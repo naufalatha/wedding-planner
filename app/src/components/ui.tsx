@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useId, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { groupDigits } from "@/domain/money";
 import { friendlyError } from "@/lib/errors";
 
@@ -105,18 +106,19 @@ export function Sheet({ open, title, onClose, children }: { open: boolean; title
     document.addEventListener("keydown", k);
     return () => document.removeEventListener("keydown", k);
   }, [open, onClose]);
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 sm:items-center" onClick={onClose}>
+  if (!open || typeof document === "undefined") return null;
+  return createPortal(
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink/40 sm:items-center" onClick={onClose}>
       <div role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}
-        className="sheet-in max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-t-card bg-bg p-5 pb-8 sm:rounded-card">
+        className="sheet-in max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-t-card bg-bg p-5 pb-[calc(2rem+env(safe-area-inset-bottom))] sm:rounded-card">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">{title}</h2>
           <button onClick={onClose} aria-label="Tutup" className="grid size-12 place-items-center rounded-full">✕</button>
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
