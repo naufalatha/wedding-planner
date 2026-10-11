@@ -1,0 +1,122 @@
+"use client";
+import Link from "next/link";
+import { useEffect, useId, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { friendlyError } from "@/lib/errors";
+
+export function cx(...c: (string | false | null | undefined)[]) { return c.filter(Boolean).join(" "); }
+
+export function Card({ tone = "white", className, children }: { tone?: "white" | "lime" | "mint" | "lavender"; className?: string; children: ReactNode }) {
+  const bg = { white: "bg-surface border border-line", lime: "bg-lime-soft", mint: "bg-mint-soft", lavender: "bg-lavender-soft" }[tone];
+  return <section className={cx("rounded-card p-5", bg, className)}>{children}</section>;
+}
+
+export function Button({ variant = "primary", className, ...p }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "danger" | "ghost" }) {
+  const v = {
+    primary: "bg-lime text-ink font-semibold active:brightness-95",
+    secondary: "bg-surface text-ink border border-line",
+    danger: "bg-surface text-danger border border-danger",
+    ghost: "text-ink px-2 underline-offset-4 hover:underline",
+  }[variant];
+  return <button {...p} className={cx("min-h-12 rounded-full text-base disabled:opacity-50 disabled:pointer-events-none", variant === "ghost" ? "" : "px-6", v, className)} />;
+}
+
+export function LinkButton({ href, variant = "primary", className, children }: { href: string; variant?: "primary" | "secondary"; className?: string; children: ReactNode }) {
+  const v = variant === "primary" ? "bg-lime text-ink font-semibold" : "bg-surface text-ink border border-line";
+  return <Link href={href} className={cx("inline-flex min-h-12 items-center justify-center rounded-full px-6 text-base", v, className)}>{children}</Link>;
+}
+
+export function Field({ label, hint, error, children }: { label: string; hint?: string; error?: string | null; children: (id: string) => ReactNode }) {
+  const id = useId();
+  return (
+    <div className="space-y-1">
+      <label htmlFor={id} className="block text-sm font-medium">{label}</label>
+      {children(id)}
+      {hint && !error && <p className="text-xs text-muted">{hint}</p>}
+      {error && <p role="alert" className="text-xs text-danger">{error}</p>}
+    </div>
+  );
+}
+
+export const inputCls = "min-h-12 w-full rounded-input border border-line bg-surface px-4 text-base outline-none focus:border-ink";
+
+export function TextInput({ label, hint, error, ...p }: React.InputHTMLAttributes<HTMLInputElement> & { label: string; hint?: string; error?: string | null }) {
+  return <Field label={label} hint={hint} error={error}>{(id) => <input id={id} {...p} className={cx(inputCls, p.className)} />}</Field>;
+}
+
+export function SelectInput({ label, children, ...p }: React.SelectHTMLAttributes<HTMLSelectElement> & { label: string }) {
+  return <Field label={label}>{(id) => <select id={id} {...p} className={inputCls}>{children}</select>}</Field>;
+}
+
+export function ProgressBar({ value }: { value: number }) {
+  const pct = Math.round(Math.min(Math.max(value, 0), 1) * 100);
+  return (
+    <div role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} className="h-3 w-full overflow-hidden rounded-full bg-surface">
+      <div className="h-full rounded-full bg-lime" style={{ width: `${pct}%` }} />
+    </div>
+  );
+}
+
+const CHIP: Record<string, string> = {
+  belum_dibayar: "bg-surface border border-line text-muted", dp: "bg-lavender-soft", lunas: "bg-mint-soft", kelebihan_bayar: "bg-lime-soft border border-ink",
+};
+const CHIP_LABEL: Record<string, string> = { belum_dibayar: "Belum dibayar", dp: "DP", lunas: "Lunas", kelebihan_bayar: "Kelebihan bayar" };
+export const StatusChip = ({ status }: { status: string }) => (
+  <span className={cx("inline-block rounded-full px-3 py-1 text-xs font-medium", CHIP[status])}>{CHIP_LABEL[status] ?? status}</span>
+);
+
+export function Chip({ active, onClick, children }: { active?: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <button type="button" onClick={onClick} aria-pressed={active}
+      className={cx("min-h-12 shrink-0 rounded-full px-4 text-sm", active ? "bg-ink text-surface" : "bg-surface border border-line")}>
+      {children}
+    </button>
+  );
+}
+
+export function Empty({ title, hint, action }: { title: string; hint?: string; action?: ReactNode }) {
+  return (
+    <div className="rounded-card border border-dashed border-line p-8 text-center">
+      <p className="font-medium">{title}</p>
+      {hint && <p className="mt-1 text-sm text-muted">{hint}</p>}
+      {action && <div className="mt-4">{action}</div>}
+    </div>
+  );
+}
+
+export function ErrorNote({ error }: { error: unknown }) {
+  if (!error) return null;
+  return <p role="alert" className="rounded-input bg-surface border border-danger p-3 text-sm text-danger">{friendlyError(error)}</p>;
+}
+
+/** Bottom sheet modal. Isian tetap ada di komponen anak; ditutup hanya oleh pengguna. */
+export function Sheet({ open, title, onClose, children }: { open: boolean; title: string; onClose: () => void; children: ReactNode }) {
+  useEffect(() => {
+    if (!open) return;
+    const k = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", k);
+    return () => document.removeEventListener("keydown", k);
+  }, [open, onClose]);
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 sm:items-center" onClick={onClose}>
+      <div role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}
+        className="max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-t-card bg-bg p-5 pb-8 sm:rounded-card">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold">{title}</h2>
+          <button onClick={onClose} aria-label="Tutup" className="grid size-12 place-items-center rounded-full">✕</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export function Loading({ label = "Memuat…" }: { label?: string }) {
+  return <p className="py-10 text-center text-sm text-muted" role="status">{label}</p>;
+}
+
+/** Hook kecil untuk konfirmasi dua langkah (tanpa window.confirm). */
+export function useConfirm() {
+  const [armed, setArmed] = useState(false);
+  return { armed, arm: () => setArmed(true), reset: () => setArmed(false) };
+}

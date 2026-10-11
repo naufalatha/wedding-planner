@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.env
+.env.local
+.env.*.local
+app/e2e/shots/
+# Berkas impor berisi data tamu nyata; jangan di-commit
+*.import-dump.txt
+import-preview*.json
+resolutions.json
+
+!app/.env.example
