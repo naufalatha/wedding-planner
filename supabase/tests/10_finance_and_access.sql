@@ -127,7 +127,7 @@ select t.fails(format($$insert into public.vendors (wedding_id,category,name,sta
 -- ============ Undangan pasangan ============
 select public.create_invitation(:'w1') as code \gset
 reset role;
-select t.eq((select count(*) from public.wedding_invitations where code_hash = digest(:'code','sha256')), 1::bigint, 'hanya hash tersimpan');
+select t.eq((select count(*) from public.wedding_invitations where code_hash = extensions.digest(:'code','sha256')), 1::bigint, 'hanya hash tersimpan');
 select t.eq((select count(*) from public.wedding_invitations where code_hash::text like '%' || :'code' || '%'), 0::bigint, 'kode asli tidak tersimpan');
 set role authenticated;
 

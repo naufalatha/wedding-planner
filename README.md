@@ -55,7 +55,7 @@ Butuh **Node.js 22.12+** (Node 20 memunculkan peringatan `EBADENGINE` dan tes bi
 Di folder `app/` sudah ada `.nvmrc`, jadi cukup `nvm install && nvm use`.
 
 **1. Siapkan database.** Di Supabase → SQL Editor, jalankan semua file di `supabase/migrations/`
-berurutan (0001 sampai 0005). Atau pakai `supabase db push`.
+berurutan (0001 sampai 0006). Atau pakai `supabase db push`.
 
 **2. Atur Auth.** Authentication → Providers → aktifkan **Email**. Untuk dua pengguna pribadi,
 matikan *Confirm email* agar bisa langsung masuk setelah daftar.
@@ -103,7 +103,7 @@ app/                  aplikasi Next.js
   tools/import/       importer spreadsheet sekali jalan
   e2e/smoke.mjs       smoke test UI (backend di-mock)
 supabase/
-  migrations/         skema, RLS, RPC, staging impor, arsip, ringkasan + pilih vendor
+  migrations/         skema, RLS, RPC, staging impor, arsip, ringkasan + pilih vendor, perbaikan pgcrypto
   tests/              tes SQL (RLS, idempotensi, undangan, pembatalan)
 docs/                 spesifikasi desain + rencana implementasi
 ```

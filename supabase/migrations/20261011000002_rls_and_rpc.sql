@@ -115,7 +115,7 @@ begin
 end $$;
 
 create or replace function public.create_invitation(p_wedding uuid) returns text
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare v_code text;
 begin
   if not public.is_owner(p_wedding) then raise exception 'forbidden' using errcode = '42501'; end if;
@@ -132,7 +132,7 @@ begin
 end $$;
 
 create or replace function public.redeem_invitation(p_code text) returns uuid
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare v_uid uuid := auth.uid(); v_inv public.wedding_invitations;
 begin
   if v_uid is null then raise exception 'not_authenticated' using errcode = '28000'; end if;
