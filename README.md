@@ -1,87 +1,161 @@
-# Wedding Planner (web / PWA)
+# 💍 Wedding Planner
 
-Aplikasi perencana pernikahan sederhana untuk dua orang, menggantikan spreadsheet
-"Wedding Planner Naufal & Bella". Dibuat sebagai web app mobile-first yang bisa dipasang
-di layar utama iPhone/Android (PWA). Spesifikasi desain: `docs/2026-10-11-wedding-planner-design.md`;
-penyesuaian ke stack web: `docs/implementation-plan.md`.
+Aplikasi perencana pernikahan yang sederhana dan bersih untuk dua orang. Menggantikan spreadsheet
+"Wedding Planner Naufal & Bella" dengan web app mobile-first yang bisa dipasang di layar utama
+iPhone dan Android (PWA).
 
-Stack: Next.js 16 (App Router) · TypeScript · Tailwind v4 · TanStack Query · Supabase
-(Auth, PostgreSQL + RLS, RPC, Realtime). Lima menu: Beranda, Keuangan, Persiapan, Vendor, Tamu.
+> **Status:** v1 siap dicoba. Belum diuji terhadap proyek Supabase sungguhan (lihat [Batasan](#batasan-yang-diketahui)).
 
-Ringkas per menu:
-- **Beranda**: hitung mundur, dana terkumpul, saldo, sisa tagihan, tugas dan tagihan terdekat, aksi cepat.
-- **Keuangan**: ringkasan anggaran (estimasi, komitmen, dibayar, sisa), item dengan jatuh tempo dan vendor, setoran per kontributor, penarikan (bisa diubah/dibatalkan).
-- **Vendor**: bandingkan kandidat per kategori, pilih satu (atomik), tambahkan ke anggaran.
-- **Tamu**: satu baris = satu undangan; jumlah orang opsional, filter tag, peringatan nama ganda.
+## Daftar isi
+- [Fitur](#fitur)
+- [Tech stack](#tech-stack)
+- [Mulai cepat](#mulai-cepat)
+- [Pemakaian pertama](#pemakaian-pertama)
+- [Pasang di ponsel](#pasang-di-ponsel)
+- [Struktur proyek](#struktur-proyek)
+- [Pengujian](#pengujian)
+- [Impor spreadsheet](#impor-spreadsheet-sekali-jalan)
+- [Keamanan](#keamanan)
+- [Batasan yang diketahui](#batasan-yang-diketahui)
 
-Catatan angka: `budget_cap` (batas anggaran) kosong sampai diatur di Akun; "Budget Plan" di spreadsheet hanyalah jumlah estimasi, jadi tidak diimpor sebagai batas.
+## Fitur
 
-## Struktur
+Lima menu di navigasi bawah:
+
+| Menu | Isi |
+|---|---|
+| **Beranda** | Hitung mundur hari H, dana terkumpul, saldo tersedia, sisa tagihan, tugas dan tagihan terdekat, aksi cepat (catat pembayaran, tugas baru) |
+| **Keuangan** | Ringkasan anggaran (estimasi, komitmen, dibayar, sisa), item dengan jatuh tempo dan vendor, setoran per kontributor, penarikan dana |
+| **Persiapan** | Daftar tugas per fase, filter (milik saya, terlambat, selesai), penanggung jawab, prioritas, catatan |
+| **Vendor** | Kandidat per kategori, bandingkan, pilih satu vendor, tambahkan ke anggaran |
+| **Tamu** | Satu baris = satu undangan, RSVP, jumlah orang opsional, filter tag, peringatan nama ganda |
+
+Akun dan undangan pasangan ada di avatar pada Beranda.
+
+**Prinsip data**
+- Uang disimpan sebagai rupiah utuh. Kosong (belum diisi) berbeda dengan 0.
+- Catatan keuangan tidak pernah dihapus keras: dibatalkan dengan alasan. Tugas, vendor, dan tamu diarsipkan.
+- Online-first: saldo selalu dihitung server, tanpa angka optimistis di layar.
+- Dua orang bisa mengedit bersamaan. Konflik terdeteksi lewat nomor revisi, perubahan live lewat Realtime.
+
+**Rumus utama**
+- Harga tagihan = harga final, atau estimasi bila final belum ada.
+- Status item: belum dibayar, DP, lunas, atau kelebihan bayar.
+- Saldo tersedia = saldo awal + setoran − penarikan − pembayaran dari dana pernikahan (refund dihitung setelah diterima).
+- Sisa anggaran rencana = batas anggaran − total komitmen (hanya muncul bila batas diatur di Akun).
+
+## Tech stack
+
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind v4 · TanStack Query ·
+Supabase (Auth, PostgreSQL + RLS, RPC, Realtime) · Vitest · Playwright
+
+## Mulai cepat
+
+Butuh Node.js 20+ dan satu proyek Supabase.
+
+**1. Siapkan database.** Di Supabase → SQL Editor, jalankan semua file di `supabase/migrations/`
+berurutan (0001 sampai 0005). Atau pakai `supabase db push`.
+
+**2. Atur Auth.** Authentication → Providers → aktifkan **Email**. Untuk dua pengguna pribadi,
+matikan *Confirm email* agar bisa langsung masuk setelah daftar.
+
+**3. Isi environment.** File contoh ada di folder `app/`:
+```bash
+cd app
+cp .env.example .env.local
 ```
-app/                 aplikasi Next.js
-  src/domain/        logika murni (rupiah, keuangan, tamu, tugas, tanggal) + tes
-  src/lib/           klien Supabase, API, hooks, pesan galat
-  src/app/           halaman (masuk, mulai, beranda, keuangan, persiapan, vendor, tamu, akun)
-  tools/import/      importer spreadsheet satu kali (preview → commit idempoten)
-  e2e/smoke.mjs      smoke test UI dengan backend di-mock
+Isi dari Supabase → Project Settings → API:
+```
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon / publishable key>
+```
+> Pakai kunci **anon** saja. Jangan pernah memasukkan `service_role` ke aplikasi ini.
+
+**4. Jalankan.**
+```bash
+npm install
+npm run dev
+```
+Buka http://localhost:3000.
+
+## Pemakaian pertama
+
+1. Daftar di halaman **Masuk**.
+2. Pilih **Buat pernikahan**: nama, tanggal, lokasi, target dana, saldo awal.
+3. Di **Akun**, isi *batas anggaran* agar "Sisa anggaran rencana" muncul.
+4. Undang pasangan: **Akun → Undang pasangan**, salin kode (berlaku 7 hari, sekali pakai, maksimal 2 anggota).
+5. Pasangan daftar dengan emailnya sendiri, lalu pilih **Punya kode** dan masukkan kode tadi.
+
+## Pasang di ponsel
+
+Deploy ke Vercel (root directory `app`, isi dua variabel env di atas), lalu buka URL-nya di ponsel:
+- **iPhone:** Safari → Bagikan → *Tambahkan ke Layar Utama*
+- **Android:** Chrome → *Instal aplikasi*
+
+## Struktur proyek
+
+```
+app/                  aplikasi Next.js
+  src/domain/         logika murni (rupiah, keuangan, tamu, tugas, tanggal) + tes
+  src/lib/            klien Supabase, API, hooks, pesan galat
+  src/app/            halaman: masuk, mulai, beranda, keuangan, persiapan, vendor, tamu, akun
+  tools/import/       importer spreadsheet sekali jalan
+  e2e/smoke.mjs       smoke test UI (backend di-mock)
 supabase/
-  migrations/        skema, RLS, RPC, staging impor, arsip, ringkasan + pilih vendor (0005)
-  tests/             tes SQL (RLS, idempotensi, undangan, pembatalan)
-docs/                spesifikasi + rencana implementasi
+  migrations/         skema, RLS, RPC, staging impor, arsip, ringkasan + pilih vendor
+  tests/              tes SQL (RLS, idempotensi, undangan, pembatalan)
+docs/                 spesifikasi desain + rencana implementasi
 ```
 
-## Menjalankan
-1. Buat proyek Supabase. Terapkan migrasi berurutan (`supabase db push`, atau tempel isi
-   `supabase/migrations/*.sql` berurutan di SQL Editor).
-2. Authentication → aktifkan Email. Untuk dua pengguna pribadi, matikan "Confirm email" bila ingin
-   langsung masuk setelah daftar, atau biarkan aktif dan konfirmasi lewat email.
-3. `cd app && cp .env.example .env.local`, isi URL dan **anon key** (bukan service-role key).
-4. `npm install && npm run dev` → buka http://localhost:3000.
-5. Daftar → **Buat pernikahan**. Pasangan mendaftar lalu memakai **Punya kode** dengan kode dari
-   **Akun → Undang pasangan** (7 hari, sekali pakai, maksimal 2 anggota).
-6. Pasang di ponsel: Safari → Bagikan → *Tambahkan ke Layar Utama*; Chrome Android → *Instal aplikasi*.
-   Deploy bisa ke Vercel (set dua variabel env di atas).
+## Pengujian
 
-## Pemeriksaan
-```
-npm run check                      # typecheck + lint + unit/integrasi
-TEST_PG_URL=postgres://postgres@127.0.0.1:5432/postgres npm test   # termasuk tes importer ke PostgreSQL
-PGHOST=… PGPORT=… PGUSER=postgres npm run test:db                  # tes skema/RLS/RPC (PostgreSQL 15+)
-npm run e2e                        # smoke UI (butuh `next start` dan Chromium)
-```
-Tes SQL memakai shim `supabase/tests/00_supabase_shim.sql` (role dan `auth.uid()`), jadi cukup PostgreSQL biasa.
+Jalankan dari folder `app/`:
+
+| Perintah | Yang diuji |
+|---|---|
+| `npm run check` | typecheck + lint + tes unit |
+| `TEST_PG_URL=postgres://postgres@127.0.0.1:5432/postgres npm test` | termasuk tes importer ke PostgreSQL |
+| `PGHOST=… PGPORT=… PGUSER=postgres npm run test:db` | skema, RLS, RPC (PostgreSQL 15+) |
+| `npm run e2e` | smoke UI (butuh `next start` dan Chromium) |
+
+Tes SQL memakai shim `supabase/tests/00_supabase_shim.sql`, jadi PostgreSQL biasa sudah cukup.
 
 ## Impor spreadsheet (sekali jalan)
-Format yang didukung: dump teks per sheet (`## Sheet name: …` + CSV). XLSX biner belum didukung;
-ekspor ke format itu atau tambahkan pembaca XLSX.
-```
+
+Format: dump teks per sheet (`## Sheet name: …` + CSV). XLSX biner belum didukung.
+
+**1. Pratinjau**
+```bash
 npm run import:preview -- /jalur/dump.txt --assumed-date 2026-10-11
 ```
-Pratinjau menampilkan jumlah per entitas, **baris yang ditahan untuk review**, dan peringatan rekonsiliasi.
+Menampilkan jumlah per entitas, **baris yang ditahan untuk review**, dan peringatan rekonsiliasi.
 Baris ambigu tidak ditebak. Putuskan lewat `resolutions.json`:
 ```json
 { "budget_item|vendor|venue|nama gedung": { "final_price": 9500000 } }
 ```
-Commit (jalankan sebagai pemilik database, bukan dari aplikasi; hanya mengisi kolom wedding yang kosong):
-```
+
+**2. Commit** (jalankan sebagai pemilik database, bukan dari aplikasi):
+```bash
 DATABASE_URL=postgres://… npm run import:commit -- /jalur/dump.txt --wedding <uuid> --user <uuid> --resolutions resolutions.json
 ```
-Commit ulang aman: baris yang sama dilewati (kunci sumber stabil + request ID pembayaran deterministik);
-baris yang sumbernya berubah dilaporkan, tidak menimpa data di aplikasi.
-**Jangan commit berkas dump atau pratinjau; isinya data tamu nyata.**
+Commit ulang aman: baris yang sama dilewati. Baris yang sumbernya berubah dilaporkan dan tidak menimpa data di aplikasi.
+
+> **Jangan commit berkas dump atau pratinjau.** Isinya data tamu nyata.
 
 ## Keamanan
-- RLS aktif di semua tabel; anon dan non-anggota ditolak. Keanggotaan, undangan, pembayaran, dan buku kas
-  hanya berubah lewat RPC `SECURITY DEFINER` (search_path dikunci, memeriksa `auth.uid()`).
-- Kode undangan hanya disimpan sebagai hash SHA-256; tidak ada service-role key di aplikasi.
-- Catatan keuangan tidak pernah dihapus keras: dibatalkan dengan alasan dan audit; tugas/vendor/tamu diarsipkan.
 
-## Batasan yang diketahui (jujur)
-- **Belum diuji terhadap Supabase sungguhan** (Auth, Realtime, PostgREST). Skema/RLS/RPC diuji di PostgreSQL 16
-  lokal; UI diuji di Chromium dengan backend di-mock. Lakukan satu putaran uji manual dengan dua akun setelah deploy.
-- Aplikasi native iOS/Android (Flutter) tidak dibuat: SDK-nya tidak dapat diunduh di lingkungan pembangunan.
-  Backend yang sama bisa dipakai klien Flutter nanti.
-- Mode offline, notifikasi push, dan penyimpanan di App Store/Play Store di luar cakupan v1 (sesuai spesifikasi).
-- Tab opsi vendor (WO/Venue/…/Honeymoon) tidak diimpor; hanya sheet *Vendors* (kandidat + pilihan akhir).
-- Sheet menghitung "Total Paid" Rp31.250.000 dari kolom *Total* item berstatus DP, bukan uang yang keluar;
-  importer hanya mengimpor nominal DP dan memperingatkan selisihnya (lihat pratinjau).
+- RLS aktif di semua tabel. Pengguna anon dan non-anggota ditolak.
+- Keanggotaan, undangan, pembayaran, dan buku kas hanya berubah lewat RPC `SECURITY DEFINER`
+  (search_path dikunci, memeriksa `auth.uid()`).
+- Kode undangan disimpan sebagai hash SHA-256. Tidak ada service-role key di aplikasi.
+
+## Batasan yang diketahui
+
+- **Belum diuji terhadap Supabase sungguhan** (Auth, Realtime, PostgREST). Skema dan RPC diuji di PostgreSQL 16 lokal,
+  UI diuji di Chromium dengan backend di-mock. Lakukan satu putaran uji manual dengan dua akun setelah deploy.
+- Aplikasi native iOS/Android (Flutter) tidak dibuat. Backend yang sama bisa dipakai klien Flutter nanti.
+- Mode offline, notifikasi push, dan App Store/Play Store di luar cakupan v1.
+- Paket vendor yang dipecah ke beberapa item anggaran belum didukung.
+- Impor: tab opsi vendor dan Honeymoon tidak diimpor, hanya sheet *Vendors*. Angka "Total Paid" Rp31.250.000 di sheet
+  adalah jumlah kolom *Total* item berstatus DP, bukan uang yang keluar, jadi hanya nominal DP yang diimpor
+  (selisihnya diperingatkan di pratinjau). Tanggal pembayaran tidak ada di sheet, jadi memakai tanggal asumsi yang ditandai.
