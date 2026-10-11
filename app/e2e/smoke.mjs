@@ -32,6 +32,7 @@ const summary = { collected: 42000000, target: 100000000, funding_progress: 0.42
 const errors = [];
 const calls = [];
 let payAttempts = 0;
+let reads = 0;
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome", args: ["--no-sandbox"] });
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, locale: "id-ID", timezoneId: "Asia/Jakarta" });
 const page = await ctx.newPage();
@@ -44,6 +45,8 @@ await ctx.route(`${API}/**`, async (route) => {
   const json = (body, status = 200) => route.fulfill({ status, contentType: "application/json", headers: { "access-control-allow-origin": "*" }, body: JSON.stringify(body) });
   if (req.method() === "OPTIONS") return route.fulfill({ status: 204, headers: { "access-control-allow-origin": "*", "access-control-allow-headers": "*", "access-control-allow-methods": "*" } });
   const p = url.pathname;
+  if (req.method() === "GET" && p.includes("/rest/v1/")) reads++;
+  if (p.includes("/rest/v1/rpc/finance_summary")) reads++;
   if (p.endsWith("/auth/v1/token")) return json({ access_token: jwt, token_type: "bearer", expires_in: 3600, expires_at: 4102444800, refresh_token: "r", user });
   if (p.endsWith("/auth/v1/user")) return json(user);
   if (p.includes("/rest/v1/rpc/finance_summary")) return json([summary]);
@@ -87,6 +90,15 @@ assert.ok(await page.getByText("Rp42.000.000").first().isVisible());
 const days = await page.locator("p.text-6xl").innerText();
 assert.match(days, /^\d+$/);
 await shot("02-beranda");
+
+// 2b. Pindah antar menu memakai cache: tidak ada pengambilan data baru
+const before = reads;
+for (const m of ["Keuangan", "Persiapan", "Vendor", "Tamu", "Beranda"]) {
+  await page.getByRole("link", { name: m, exact: true }).click();
+  await page.waitForURL(`**/${m.toLowerCase()}`);
+}
+await page.waitForTimeout(500);
+assert.equal(reads, before, `pindah menu tidak boleh memuat ulang data (${reads - before} request baru)`);
 
 // 3. Keuangan
 await page.getByRole("link", { name: "Keuangan" }).click();

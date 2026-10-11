@@ -18,20 +18,21 @@ export function useSession() {
   return { session, ready };
 }
 
-export const useMembership = (enabled: boolean) => useQuery({ queryKey: ["membership"], queryFn: api.getMembership, enabled });
+export const useMembership = (enabled: boolean) => useQuery({ queryKey: ["membership"], queryFn: api.getMembership, enabled, staleTime: Infinity });
 
-export function useWeddingData(w: string) {
+export function useWeddingData(w: string, enabled = true) {
+  const on = { enabled: enabled && w !== "" };
   return {
-    wedding: useQuery({ queryKey: ["wedding", w], queryFn: () => api.getWedding(w) }),
-    summary: useQuery({ queryKey: ["summary", w], queryFn: () => api.financeSummary(w) }),
-    deposits: useQuery({ queryKey: ["deposits", w], queryFn: () => api.listDeposits(w) }),
-    withdrawals: useQuery({ queryKey: ["withdrawals", w], queryFn: () => api.listWithdrawals(w) }),
-    items: useQuery({ queryKey: ["items", w], queryFn: () => api.listItems(w) }),
-    payments: useQuery({ queryKey: ["payments", w], queryFn: () => api.listPayments(w) }),
-    vendors: useQuery({ queryKey: ["vendors", w], queryFn: () => api.listVendors(w) }),
-    tasks: useQuery({ queryKey: ["tasks", w], queryFn: () => api.listTasks(w) }),
-    guests: useQuery({ queryKey: ["guests", w], queryFn: () => api.listGuests(w) }),
-    members: useQuery({ queryKey: ["members", w], queryFn: () => api.listMembers(w) }),
+    wedding: useQuery({ queryKey: ["wedding", w], queryFn: () => api.getWedding(w), ...on }),
+    summary: useQuery({ queryKey: ["summary", w], queryFn: () => api.financeSummary(w), ...on }),
+    deposits: useQuery({ queryKey: ["deposits", w], queryFn: () => api.listDeposits(w), ...on }),
+    withdrawals: useQuery({ queryKey: ["withdrawals", w], queryFn: () => api.listWithdrawals(w), ...on }),
+    items: useQuery({ queryKey: ["items", w], queryFn: () => api.listItems(w), ...on }),
+    payments: useQuery({ queryKey: ["payments", w], queryFn: () => api.listPayments(w), ...on }),
+    vendors: useQuery({ queryKey: ["vendors", w], queryFn: () => api.listVendors(w), ...on }),
+    tasks: useQuery({ queryKey: ["tasks", w], queryFn: () => api.listTasks(w), ...on }),
+    guests: useQuery({ queryKey: ["guests", w], queryFn: () => api.listGuests(w), ...on }),
+    members: useQuery({ queryKey: ["members", w], queryFn: () => api.listMembers(w), ...on }),
   };
 }
 

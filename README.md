@@ -79,6 +79,9 @@ npm run dev
 ```
 Buka http://localhost:3000.
 
+> `npm run dev` lebih lambat karena mode pengembangan. Untuk merasakan kecepatan sebenarnya: `npm run build && npm start`.
+> Pilih region Supabase terdekat (Singapore) saat membuat proyek; region jauh menambah latensi tiap request.
+
 ## Pemakaian pertama
 
 1. Daftar di halaman **Masuk**.

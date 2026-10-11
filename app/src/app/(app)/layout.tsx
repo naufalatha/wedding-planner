@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { SetupNotice } from "@/components/setup-notice";
 import { cx, ErrorNote, Loading } from "@/components/ui";
-import { useMembership, useSession } from "@/lib/hooks";
+import { useMembership, useSession, useWeddingData } from "@/lib/hooks";
 import { useRealtimeInvalidation } from "@/lib/query";
 import { isConfigured } from "@/lib/supabase";
 import { WeddingProvider } from "@/lib/wedding-context";
@@ -24,6 +24,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const membership = useMembership(Boolean(session));
   const weddingId = membership.data?.wedding_id;
   useRealtimeInvalidation(weddingId);
+  // Muat semua data sekali di sini dan jaga tetap aktif; halaman membaca dari cache sehingga pindah menu instan.
+  useWeddingData(weddingId ?? "", Boolean(weddingId));
 
   useEffect(() => {
     if (!isConfigured) return;
