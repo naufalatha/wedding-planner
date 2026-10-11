@@ -34,7 +34,7 @@ export default function Tamu() {
   return (
     <div className="space-y-4">
       <h1 className="text-3xl font-extrabold tracking-tight">Tamu</h1>
-      <Card tone="lime">
+      <Card tone="accent">
         <p className="text-sm">Undangan</p>
         <p className="text-4xl font-extrabold">{sum.invitations}</p>
         <p className="mt-1 text-sm">{sum.invitationsSent} terkirim · {sum.attendingInvitations} hadir · {sum.declinedInvitations} tidak hadir</p>

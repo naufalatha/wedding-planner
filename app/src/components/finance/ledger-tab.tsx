@@ -21,7 +21,7 @@ export function LedgerTab({ kind, weddingId, rows }: { kind: "deposit" | "withdr
     <div className="space-y-3">
       <Button className="w-full" onClick={() => setEditing("new")}>Tambah {noun.toLowerCase()}</Button>
       {totals.length > 0 && (
-        <Card tone="mint" className="!p-4">
+        <Card tone="sage" className="!p-4">
           <h3 className="mb-2 text-sm font-semibold">Per kontributor</h3>
           <ul className="space-y-1">{totals.map((t) => <li key={t.name} className="flex justify-between text-sm"><span>{t.name}</span><span className="font-semibold">{formatRupiah(t.total)}</span></li>)}</ul>
         </Card>

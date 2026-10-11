@@ -48,7 +48,7 @@ function Body({ weddingId, item, payments, vendors, onClose }: { weddingId: stri
 
   return (
     <div className="space-y-5">
-      <Card tone="lavender">
+      <Card tone="blush">
         <div className="flex items-center justify-between"><StatusChip status={item.status} /><span className="text-xs text-muted">{item.category ?? ""}</span></div>
         <dl className="mt-3 grid grid-cols-3 gap-2 text-sm">
           <div><dt className="text-xs text-muted">Harga</dt><dd className="font-semibold">{formatRupiah(item.committed_price)}</dd></div>

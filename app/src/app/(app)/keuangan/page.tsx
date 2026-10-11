@@ -39,7 +39,7 @@ export default function Keuangan() {
   return (
     <div className="space-y-4">
       <h1 className="text-3xl font-extrabold tracking-tight">Keuangan</h1>
-      <Card tone="mint">
+      <Card tone="sage">
         <p className="text-sm">Dana terkumpul</p>
         <p className="mb-3 text-[min(1.875rem,7.5vw)] font-extrabold">{formatRupiah(s.collected)}</p>
         <ProgressBar value={s.funding_progress ?? 0} />
@@ -60,7 +60,7 @@ export default function Keuangan() {
           <div className="flex flex-wrap justify-between gap-x-3"><dt className="text-muted">Pembayaran tercatat</dt><dd className="min-w-0 font-medium">{formatRupiah(s.total_paid)}</dd></div>
           <div className="flex flex-wrap justify-between gap-x-3"><dt className="text-muted">Sisa anggaran rencana</dt><dd className={`min-w-0 text-right font-medium ${(s.plan_remaining ?? 0) < 0 ? "text-danger" : ""}`}>{s.plan_remaining === null ? "Batas belum diatur" : formatRupiah(s.plan_remaining)}</dd></div>
         </dl>
-        {s.unpriced_count > 0 && <p className="mt-3 rounded-input bg-lime-soft p-2 text-xs">{s.unpriced_count} item belum dianggarkan, belum dihitung di total.</p>}
+        {s.unpriced_count > 0 && <p className="mt-3 rounded-input bg-accent-soft p-2 text-xs">{s.unpriced_count} item belum dianggarkan, belum dihitung di total.</p>}
         {s.plan_remaining === null && <p className="mt-2 text-xs text-muted">Atur batas anggaran di Akun untuk melihat sisa anggaran rencana.</p>}
       </Card>
       {s.available_balance < 0 && <p role="alert" className="rounded-input border border-danger p-3 text-sm text-danger">Saldo dana negatif: pengeluaran sudah melebihi dana yang terkumpul.</p>}

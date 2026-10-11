@@ -28,7 +28,7 @@ export default function Persiapan() {
   return (
     <div className="space-y-4">
       <h1 className="text-3xl font-extrabold tracking-tight">Persiapan</h1>
-      <Card tone="lavender">
+      <Card tone="blush">
         <p className="text-sm">Progres</p>
         {progress.ratio === null ? <p className="text-xl font-bold">Belum ada tugas</p> : (
           <>
@@ -53,7 +53,7 @@ export default function Persiapan() {
               return (
                 <div key={t.id} className="flex items-center gap-1 rounded-card border border-line bg-surface">
                   <button onClick={() => toggle.mutate(t)} role="checkbox" aria-checked={t.done} aria-label={`Tandai ${t.title}`} disabled={toggle.isPending}
-                    className="grid size-12 shrink-0 place-items-center"><span className={`grid size-6 place-items-center rounded-full border-2 border-ink ${t.done ? "bg-lime" : ""}`}>{t.done && "✓"}</span></button>
+                    className="grid size-12 shrink-0 place-items-center"><span className={`grid size-6 place-items-center rounded-full border-2 border-ink ${t.done ? "bg-accent" : ""}`}>{t.done && "✓"}</span></button>
                   <button onClick={() => setEditing(t)} className="min-h-12 min-w-0 flex-1 py-2 pr-4 text-left">
                     <p className={`truncate ${t.done ? "text-muted line-through" : "font-medium"}`}>{t.title}</p>
                     {meta && <p className={`truncate text-xs ${!t.done && t.deadline && t.deadline < today ? "text-danger" : "text-muted"}`}>{meta}</p>}

@@ -6,14 +6,14 @@ import { friendlyError } from "@/lib/errors";
 
 export function cx(...c: (string | false | null | undefined)[]) { return c.filter(Boolean).join(" "); }
 
-export function Card({ tone = "white", className, children }: { tone?: "white" | "lime" | "mint" | "lavender"; className?: string; children: ReactNode }) {
-  const bg = { white: "bg-surface border border-line", lime: "bg-lime-soft", mint: "bg-mint-soft", lavender: "bg-lavender-soft" }[tone];
+export function Card({ tone = "white", className, children }: { tone?: "white" | "accent" | "sage" | "blush"; className?: string; children: ReactNode }) {
+  const bg = { white: "bg-surface border border-line", accent: "bg-accent-soft", sage: "bg-sage-soft", blush: "bg-blush-soft" }[tone];
   return <section className={cx("rounded-card p-5", bg, className)}>{children}</section>;
 }
 
 export function Button({ variant = "primary", className, ...p }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "danger" | "ghost" }) {
   const v = {
-    primary: "bg-lime text-ink font-semibold active:brightness-95",
+    primary: "bg-accent text-ink font-semibold active:brightness-95",
     secondary: "bg-surface text-ink border border-line",
     danger: "bg-surface text-danger border border-danger",
     ghost: "text-ink px-2 underline-offset-4 hover:underline",
@@ -22,7 +22,7 @@ export function Button({ variant = "primary", className, ...p }: ButtonHTMLAttri
 }
 
 export function LinkButton({ href, variant = "primary", className, children }: { href: string; variant?: "primary" | "secondary"; className?: string; children: ReactNode }) {
-  const v = variant === "primary" ? "bg-lime text-ink font-semibold" : "bg-surface text-ink border border-line";
+  const v = variant === "primary" ? "bg-accent text-ink font-semibold" : "bg-surface text-ink border border-line";
   return <Link href={href} className={cx("inline-flex min-h-12 items-center justify-center rounded-full px-6 text-base", v, className)}>{children}</Link>;
 }
 
@@ -60,13 +60,13 @@ export function ProgressBar({ value }: { value: number }) {
   const pct = Math.round(Math.min(Math.max(value, 0), 1) * 100);
   return (
     <div role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} className="h-3 w-full overflow-hidden rounded-full bg-surface">
-      <div className="h-full rounded-full bg-lime transition-[width] duration-700 ease-out" style={{ width: `${pct}%` }} />
+      <div className="h-full rounded-full bg-accent transition-[width] duration-700 ease-out" style={{ width: `${pct}%` }} />
     </div>
   );
 }
 
 const CHIP: Record<string, string> = {
-  belum_dibayar: "bg-surface border border-line text-muted", dp: "bg-lavender-soft", lunas: "bg-mint-soft", kelebihan_bayar: "bg-lime-soft border border-ink",
+  belum_dibayar: "bg-surface border border-line text-muted", dp: "bg-blush-soft", lunas: "bg-sage-soft", kelebihan_bayar: "bg-accent-soft border border-ink",
 };
 const CHIP_LABEL: Record<string, string> = { belum_dibayar: "Belum dibayar", dp: "DP", lunas: "Lunas", kelebihan_bayar: "Kelebihan bayar" };
 export const StatusChip = ({ status }: { status: string }) => (
@@ -120,11 +120,21 @@ export function Sheet({ open, title, onClose, children }: { open: boolean; title
   );
 }
 
-/** Layar penuh saat sesi/keanggotaan dimuat: cincin berputar lembut. */
+/** Logo dua cincin. `spin` memutarnya (dipakai saat memuat). */
+export function Logo({ size = 56, spin = false }: { size?: number; spin?: boolean }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 512 512" aria-hidden className={spin ? "logo-spin" : undefined}>
+      <rect width="512" height="512" rx="112" fill="var(--accent)" />
+      <g fill="none" stroke="var(--text)" strokeWidth="36" strokeLinecap="round"><circle cx="200" cy="288" r="84" /><circle cx="312" cy="288" r="84" /></g>
+    </svg>
+  );
+}
+
+/** Layar penuh saat sesi/keanggotaan dimuat (termasuk setelah refresh): logo berputar. */
 export function Loading({ label = "Memuat…" }: { label?: string }) {
   return (
-    <div role="status" className="flex min-h-[40dvh] flex-col items-center justify-center gap-3 py-10">
-      <span className="spinner" aria-hidden />
+    <div role="status" className="flex min-h-[60dvh] flex-col items-center justify-center gap-4 py-10">
+      <Logo size={64} spin />
       <span className="text-sm text-muted">{label}</span>
     </div>
   );

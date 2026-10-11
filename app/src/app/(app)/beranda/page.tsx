@@ -10,7 +10,7 @@ import { useWeddingData } from "@/lib/hooks";
 import { useWedding } from "@/lib/wedding-context";
 
 const GRID = "grid grid-cols-[repeat(auto-fit,minmax(min(100%,9rem),1fr))] gap-3";
-const Incomplete = ({ children }: { children: string }) => <span className="mt-1 inline-block rounded-full bg-lime-soft px-2 py-0.5 text-[11px] font-medium">{children}</span>;
+const Incomplete = ({ children }: { children: string }) => <span className="mt-1 inline-block rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-medium">{children}</span>;
 
 export default function Beranda() {
   const { weddingId, email } = useWedding();
@@ -36,10 +36,10 @@ export default function Beranda() {
           <p className="text-sm text-muted">{w.wedding_date ? new Date(w.wedding_date + "T00:00:00Z").toLocaleDateString("id-ID", { dateStyle: "full", timeZone: "UTC" }) : "Tanggal belum ditentukan"}{w.location ? ` · ${w.location}` : ""}</p>
           <h1 className="mt-1 text-4xl font-extrabold leading-tight tracking-tight">{w.groom_name.split(" ")[0]} &amp; {w.bride_name.split(" ")[0]}</h1>
         </div>
-        <Link href="/akun" aria-label="Akun dan pengaturan" className="grid size-12 shrink-0 place-items-center rounded-full bg-lime font-bold">{(email[0] ?? "?").toUpperCase()}</Link>
+        <Link href="/akun" aria-label="Akun dan pengaturan" className="grid size-12 shrink-0 place-items-center rounded-full bg-accent font-bold">{(email[0] ?? "?").toUpperCase()}</Link>
       </header>
 
-      <Card tone="lime">
+      <Card tone="accent">
         <p className="text-sm">{days === null ? "Hitung mundur" : days >= 0 ? "Hari menuju hari H" : "Hari sejak hari H"}</p>
         <p className="text-6xl font-extrabold tabular-nums">{days === null ? "—" : Math.abs(days)}</p>
         {days === null && <Incomplete>Belum lengkap: isi tanggal di Akun</Incomplete>}
@@ -51,7 +51,7 @@ export default function Beranda() {
       </div>
 
       <Link href="/keuangan" className="block">
-        <Card tone="mint">
+        <Card tone="sage">
           <div className="flex items-baseline justify-between">
             <p className="text-sm">Dana terkumpul</p>
             <p className="text-sm font-semibold">{pct === null ? "—" : `${pct}%`}</p>
@@ -94,7 +94,7 @@ export default function Beranda() {
       </section>
 
       <div className={GRID}>
-        <Link href="/persiapan"><Card tone="lavender" className="h-full">
+        <Link href="/persiapan"><Card tone="blush" className="h-full">
           <p className="text-xs">Persiapan</p>
           {progress.ratio === null ? <p className="mt-1 text-lg font-bold">Belum ada tugas</p> : <><p className="mt-1 text-lg font-bold">{progress.done} dari {progress.total} selesai</p><div className="mt-2"><ProgressBar value={progress.ratio} /></div></>}
         </Card></Link>

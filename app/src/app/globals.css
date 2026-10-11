@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #fafaf7;
+  --bg: #f8f6f1;
   --surface: #ffffff;
-  --text: #171717;
-  --text-secondary: #666a66;
-  --border: #e5e7e1;
-  --lime: #d7ff00;
-  --lime-soft: #f1f8c8;
-  --mint-soft: #e8f3ea;
-  --lavender-soft: #eee9f8;
+  --text: #1e2b25;
+  --text-secondary: #5f6b64;
+  --border: #e6e2d8;
+  --accent: #c8a25e;
+  --accent-soft: #f3ead5;
+  --sage-soft: #e2ebe3;
+  --blush-soft: #f6e5e1;
   --error: #b42318;
 }
 
@@ -19,10 +19,10 @@
   --color-ink: var(--text);
   --color-muted: var(--text-secondary);
   --color-line: var(--border);
-  --color-lime: var(--lime);
-  --color-lime-soft: var(--lime-soft);
-  --color-mint-soft: var(--mint-soft);
-  --color-lavender-soft: var(--lavender-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-sage-soft: var(--sage-soft);
+  --color-blush-soft: var(--blush-soft);
   --color-danger: var(--error);
   --radius-card: 20px;
   --radius-input: 12px;
@@ -42,24 +42,20 @@ body {
 
 /* ---- Loading & transisi (hormati prefers-reduced-motion) ---- */
 .skeleton {
-  background: linear-gradient(90deg, var(--border) 0%, #f1f2ee 50%, var(--border) 100%);
+  background: linear-gradient(90deg, var(--border) 0%, #f2efe7 50%, var(--border) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
 }
-.spinner {
-  width: 36px; height: 36px; border-radius: 9999px;
-  border: 3px solid var(--border); border-top-color: var(--text);
-  animation: spin 0.8s linear infinite;
-}
+.logo-spin { animation: logo-spin 1.6s cubic-bezier(0.65, 0, 0.35, 1) infinite; transform-origin: 50% 50%; }
 .page-in { animation: page-in 220ms ease-out both; }
 .sheet-in { animation: sheet-in 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 
 @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes logo-spin { 0% { transform: rotate(0) scale(1); } 50% { transform: rotate(180deg) scale(0.9); } 100% { transform: rotate(360deg) scale(1); } }
 @keyframes page-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .skeleton, .spinner, .page-in, .sheet-in { animation: none; }
+  .skeleton, .logo-spin, .page-in, .sheet-in { animation: none; }
   .skeleton { background: var(--border); }
 }

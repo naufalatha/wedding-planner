@@ -36,7 +36,7 @@ export default function VendorPage() {
               {open.length >= 2 && <button className="min-h-12 px-2 text-sm font-semibold underline" onClick={() => setComparing(c)}>Bandingkan</button>}
             </div>
             {list.map((v) => (
-              <button key={v.id} onClick={() => setEditing(v)} className={`block min-h-12 w-full rounded-card p-4 text-left ${v.status === "selected" ? "bg-mint-soft" : "border border-line bg-surface"} ${v.status === "rejected" ? "opacity-60" : ""}`}>
+              <button key={v.id} onClick={() => setEditing(v)} className={`block min-h-12 w-full rounded-card p-4 text-left ${v.status === "selected" ? "bg-sage-soft" : "border border-line bg-surface"} ${v.status === "rejected" ? "opacity-60" : ""}`}>
                 <div className="flex items-start justify-between gap-3"><p className="font-medium">{v.name}</p><span className="shrink-0 text-xs font-medium">{STATUS[v.status]}</span></div>
                 <p className="text-sm text-muted">{v.price_quote === null ? "Harga belum ada" : formatRupiah(v.price_quote)}{v.package ? ` · ${v.package}` : ""}</p>
               </button>
@@ -51,7 +51,7 @@ export default function VendorPage() {
       <Sheet open={comparing !== null} title={`Bandingkan: ${comparing ?? ""}`} onClose={() => setComparing(null)}>
         <div className="space-y-3">
           {compareList.map((v) => (
-            <Card key={v.id} tone={v.status === "selected" ? "mint" : undefined} className="!p-4">
+            <Card key={v.id} tone={v.status === "selected" ? "sage" : undefined} className="!p-4">
               <p className="font-bold">{v.name} <span className="text-xs font-normal text-muted">{STATUS[v.status]}</span></p>
               <dl className="mt-2 space-y-1 text-sm">
                 <div className="flex justify-between gap-3"><dt className="text-muted">Harga</dt><dd className="font-medium">{v.price_quote === null ? "Belum ada" : formatRupiah(v.price_quote)}</dd></div>

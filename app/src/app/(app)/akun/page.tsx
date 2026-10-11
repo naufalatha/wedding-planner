@@ -62,7 +62,7 @@ export default function Akun() {
       </Card>
 
       {role === "owner" && (
-        <Card tone="mint">
+        <Card tone="sage">
           <h2 className="text-lg font-bold">Undang pasangan</h2>
           {(members.data?.length ?? 0) >= 2 ? (
             <p className="mt-1 text-sm">✓ Pasangan Anda sudah bergabung. Pernikahan ini sudah berisi 2 anggota.</p>

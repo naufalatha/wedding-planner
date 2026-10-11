@@ -64,7 +64,7 @@ export default function Mulai() {
         </form>
       ) : (
         <form onSubmit={join} className="space-y-4">
-          <Card tone="mint"><p className="text-sm">Minta pasangan membuka <b>Akun</b> → <b>Undang pasangan</b>. Kodenya berlaku 7 hari dan hanya bisa dipakai sekali.</p></Card>
+          <Card tone="sage"><p className="text-sm">Minta pasangan membuka <b>Akun</b> → <b>Undang pasangan</b>. Kodenya berlaku 7 hari dan hanya bisa dipakai sekali.</p></Card>
           <TextInput label="Kode undangan" required autoCapitalize="characters" autoComplete="off" spellCheck={false} className="font-mono tracking-widest" value={f.code} onChange={(e) => setF({ ...f, code: e.target.value.toUpperCase() })} />
           <ErrorNote error={error} />
           <Button type="submit" className="w-full" disabled={busy}>{busy ? "Memeriksa…" : "Gabung"}</Button>

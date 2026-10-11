@@ -47,7 +47,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             return (
               <li key={n.href}>
                 <Link href={n.href} aria-current={active ? "page" : undefined} className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-0.5 py-1.5 text-[11px]">
-                  <span className={cx("grid h-7 w-[min(3rem,100%)] place-items-center rounded-full", active && "bg-lime")}>
+                  <span className={cx("grid h-7 w-[min(3rem,100%)] place-items-center rounded-full", active && "bg-accent")}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d={n.d} /></svg>
                   </span>
                   <span className={active ? "font-semibold" : "text-muted"}>{n.label}</span>
