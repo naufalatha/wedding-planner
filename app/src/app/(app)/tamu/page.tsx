@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import { Button, Card, Chip, Empty, ErrorNote, Loading, SelectInput, Sheet, TextInput, useConfirm } from "@/components/ui";
+import { Button, Card, Chip, Empty, ErrorNote, SelectInput, Sheet, TextInput, useConfirm, ListSkeleton } from "@/components/ui";
 import { duplicateNames, guestSummary, validateAttendance, type Rsvp } from "@/domain/guests";
 import { archiveRow, insertRow, updateRow } from "@/lib/api";
 import { useAction, useWeddingData } from "@/lib/hooks";
@@ -29,7 +29,7 @@ export default function Tamu() {
   const tags = useMemo(() => [...new Set(list.map((g) => g.tag).filter((t): t is string => !!t))].sort(), [list]);
   const dupes = useMemo(() => new Set(duplicateNames(list.map((g) => g.name))), [list]);
   if (guests.error) return <ErrorNote error={guests.error} />;
-  if (!guests.data) return <Loading />;
+  if (!guests.data) return <ListSkeleton summary rows={6} />;
 
   return (
     <div className="space-y-4">

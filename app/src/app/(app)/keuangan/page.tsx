@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { ItemSheet } from "@/components/finance/item-sheet";
 import { LedgerTab } from "@/components/finance/ledger-tab";
-import { Button, Card, Chip, Empty, ErrorNote, Loading, ProgressBar, SelectInput, Sheet, StatusChip, TextInput, MoneyInput } from "@/components/ui";
+import { Button, Card, Chip, Empty, ErrorNote, ProgressBar, SelectInput, Sheet, StatusChip, TextInput, MoneyInput, ListSkeleton } from "@/components/ui";
 import { formatRupiah, parseRupiah } from "@/domain/money";
 import { insertRow } from "@/lib/api";
 import { formatShortDate } from "@/domain/dates";
@@ -29,7 +29,7 @@ export default function Keuangan() {
 
   const err = d.summary.error ?? d.items.error;
   if (err) return <ErrorNote error={err} />;
-  if (!d.summary.data || !d.items.data) return <Loading />;
+  if (!d.summary.data || !d.items.data) return <ListSkeleton summary rows={4} />;
   const s = d.summary.data;
   const items = d.items.data;
   const sections = (Object.keys(SECTION) as Section[]).map((k) => [k, items.filter((i) => i.section === k)] as const).filter(([, v]) => v.length > 0);

@@ -60,7 +60,7 @@ export function ProgressBar({ value }: { value: number }) {
   const pct = Math.round(Math.min(Math.max(value, 0), 1) * 100);
   return (
     <div role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} className="h-3 w-full overflow-hidden rounded-full bg-surface">
-      <div className="h-full rounded-full bg-lime" style={{ width: `${pct}%` }} />
+      <div className="h-full rounded-full bg-lime transition-[width] duration-700 ease-out" style={{ width: `${pct}%` }} />
     </div>
   );
 }
@@ -109,7 +109,7 @@ export function Sheet({ open, title, onClose, children }: { open: boolean; title
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 sm:items-center" onClick={onClose}>
       <div role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}
-        className="max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-t-card bg-bg p-5 pb-8 sm:rounded-card">
+        className="sheet-in max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-t-card bg-bg p-5 pb-8 sm:rounded-card">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">{title}</h2>
           <button onClick={onClose} aria-label="Tutup" className="grid size-12 place-items-center rounded-full">✕</button>
@@ -120,8 +120,46 @@ export function Sheet({ open, title, onClose, children }: { open: boolean; title
   );
 }
 
+/** Layar penuh saat sesi/keanggotaan dimuat: cincin berputar lembut. */
 export function Loading({ label = "Memuat…" }: { label?: string }) {
-  return <p className="py-10 text-center text-sm text-muted" role="status">{label}</p>;
+  return (
+    <div role="status" className="flex min-h-[40dvh] flex-col items-center justify-center gap-3 py-10">
+      <span className="spinner" aria-hidden />
+      <span className="text-sm text-muted">{label}</span>
+    </div>
+  );
+}
+
+export function Skeleton({ className }: { className?: string }) {
+  return <div aria-hidden className={cx("skeleton rounded-input", className)} />;
+}
+
+/** Kerangka halaman daftar: judul, tombol, lalu beberapa kartu. Memberi kesan konten sedang tiba. */
+export function ListSkeleton({ rows = 4, summary = false }: { rows?: number; summary?: boolean }) {
+  return (
+    <div role="status" aria-label="Memuat" className="space-y-4">
+      <span className="sr-only">Memuat…</span>
+      <Skeleton className="h-9 w-40" />
+      {summary && <Skeleton className="h-32 w-full !rounded-card" />}
+      <Skeleton className="h-12 w-full !rounded-full" />
+      {Array.from({ length: rows }, (_, i) => <Skeleton key={i} className="h-20 w-full !rounded-card" />)}
+    </div>
+  );
+}
+
+/** Kerangka Beranda: hitung mundur, kartu dana, dua angka ringkas, daftar. */
+export function HomeSkeleton() {
+  return (
+    <div role="status" aria-label="Memuat" className="space-y-4">
+      <span className="sr-only">Memuat…</span>
+      <div className="flex items-center justify-between"><Skeleton className="h-8 w-44" /><Skeleton className="size-12 !rounded-full" /></div>
+      <Skeleton className="h-40 w-full !rounded-card" />
+      <div className="grid grid-cols-2 gap-3"><Skeleton className="h-12 !rounded-full" /><Skeleton className="h-12 !rounded-full" /></div>
+      <Skeleton className="h-28 w-full !rounded-card" />
+      <div className="grid grid-cols-2 gap-3"><Skeleton className="h-20 !rounded-card" /><Skeleton className="h-20 !rounded-card" /></div>
+      <Skeleton className="h-24 w-full !rounded-card" />
+    </div>
+  );
 }
 
 /** Hook kecil untuk konfirmasi dua langkah (tanpa window.confirm). */

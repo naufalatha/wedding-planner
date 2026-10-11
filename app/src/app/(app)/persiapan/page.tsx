@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import { Button, Card, Chip, Empty, ErrorNote, Loading, ProgressBar, SelectInput, Sheet, TextInput, useConfirm } from "@/components/ui";
+import { Button, Card, Chip, Empty, ErrorNote, ProgressBar, SelectInput, Sheet, TextInput, useConfirm, ListSkeleton } from "@/components/ui";
 import { jakartaDate } from "@/domain/dates";
 import { matchesFilter, taskProgress, type TaskFilter } from "@/domain/tasks";
 import { archiveRow, insertRow, updateRow } from "@/lib/api";
@@ -22,7 +22,7 @@ export default function Persiapan() {
   const like = (t: PrepTask) => ({ done: t.done, deadline: t.deadline, assigneeId: t.assignee_id });
   const progress = useMemo(() => taskProgress(all.map(like)), [all]);
   if (tasks.error) return <ErrorNote error={tasks.error} />;
-  if (!tasks.data) return <Loading />;
+  if (!tasks.data) return <ListSkeleton summary rows={5} />;
   const who = (id: string | null) => (id === null ? null : id === userId ? "Saya" : "Pasangan");
 
   return (

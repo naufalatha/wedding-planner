@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { Card, ErrorNote, LinkButton, Loading, ProgressBar } from "@/components/ui";
+import { Card, ErrorNote, LinkButton, ProgressBar, HomeSkeleton } from "@/components/ui";
 import { daysUntil, formatShortDate, jakartaDate } from "@/domain/dates";
 import { guestSummary } from "@/domain/guests";
 import { isPast, nearestBills, nearestOpenTasks } from "@/domain/home";
@@ -17,7 +17,7 @@ export default function Beranda() {
   const d = useWeddingData(weddingId);
   const err = d.wedding.error ?? d.summary.error;
   if (err) return <ErrorNote error={err} />;
-  if (!d.wedding.data || !d.summary.data) return <Loading />;
+  if (!d.wedding.data || !d.summary.data) return <HomeSkeleton />;
   const w = d.wedding.data;
   const s = d.summary.data;
   const today = jakartaDate(new Date());

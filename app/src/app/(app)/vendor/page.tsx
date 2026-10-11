@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Button, Card, Empty, ErrorNote, Loading, SelectInput, Sheet, TextInput, useConfirm, MoneyInput } from "@/components/ui";
+import { Button, Card, Empty, ErrorNote, SelectInput, Sheet, TextInput, useConfirm, MoneyInput, ListSkeleton } from "@/components/ui";
 import { formatRupiah, parseRupiah } from "@/domain/money";
 import { archiveRow, insertRow, selectVendor, updateRow } from "@/lib/api";
 import { useAction, useWeddingData } from "@/lib/hooks";
@@ -17,7 +17,7 @@ export default function VendorPage() {
   const [editing, setEditing] = useState<Vendor | "new" | null>(null);
   const [comparing, setComparing] = useState<string | null>(null);
   if (vendors.error) return <ErrorNote error={vendors.error} />;
-  if (!vendors.data) return <Loading />;
+  if (!vendors.data) return <ListSkeleton rows={4} />;
   const cats = [...new Set(vendors.data.map((v) => v.category))];
   const compareList = comparing ? vendors.data.filter((v) => v.category === comparing && v.status !== "rejected") : [];
   return (

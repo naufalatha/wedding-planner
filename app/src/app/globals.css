@@ -39,3 +39,27 @@ body {
   font-family: var(--font-sans);
   -webkit-tap-highlight-color: transparent;
 }
+
+/* ---- Loading & transisi (hormati prefers-reduced-motion) ---- */
+.skeleton {
+  background: linear-gradient(90deg, var(--border) 0%, #f1f2ee 50%, var(--border) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+.spinner {
+  width: 36px; height: 36px; border-radius: 9999px;
+  border: 3px solid var(--border); border-top-color: var(--text);
+  animation: spin 0.8s linear infinite;
+}
+.page-in { animation: page-in 220ms ease-out both; }
+.sheet-in { animation: sheet-in 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes page-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton, .spinner, .page-in, .sheet-in { animation: none; }
+  .skeleton { background: var(--border); }
+}

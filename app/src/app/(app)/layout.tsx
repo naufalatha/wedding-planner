@@ -39,7 +39,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <WeddingProvider value={{ weddingId: membership.data.wedding_id, role: membership.data.role, email: session.user.email ?? "", userId: session.user.id }}>
-      <div className="mx-auto min-h-dvh max-w-2xl px-5 pb-28 pt-6">{children}</div>
+      <div key={path} className="page-in mx-auto min-h-dvh max-w-2xl px-5 pb-28 pt-6">{children}</div>
       <nav aria-label="Menu utama" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
         <ul className="mx-auto grid max-w-2xl grid-cols-5">
           {NAV.map((n) => {
