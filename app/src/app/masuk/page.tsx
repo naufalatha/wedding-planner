@@ -7,13 +7,15 @@ import { isConfigured, supabase } from "@/lib/supabase";
 
 export default function Masuk() {
   const router = useRouter();
-  const [mode, setMode] = useState<"masuk" | "daftar">("masuk");
+  const [mode, setMode] = useState<"masuk" | "daftar">(() => (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("kode") ? "daftar" : "masuk"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [info, setInfo] = useState<string | null>(null);
   if (!isConfigured) return <SetupNotice />;
+  const kode = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("kode") : null;
+  const after = kode ? `/mulai?kode=${encodeURIComponent(kode)}` : "/beranda";
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -23,11 +25,11 @@ export default function Masuk() {
       if (mode === "masuk") {
         const { error } = await sb.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        router.replace("/beranda");
+        router.replace(after);
       } else {
         const { data, error } = await sb.auth.signUp({ email, password });
         if (error) throw error;
-        if (data.session) router.replace("/beranda");
+        if (data.session) router.replace(after);
         else setInfo("Akun dibuat. Periksa email Anda untuk konfirmasi, lalu masuk.");
       }
     } catch (err) { setError(err); } finally { setBusy(false); }
@@ -39,6 +41,7 @@ export default function Masuk() {
         <div className="mb-4 grid size-14 place-items-center rounded-2xl bg-lime text-2xl" aria-hidden>💍</div>
         <h1 className="text-4xl font-extrabold tracking-tight">Wedding Planner</h1>
         <p className="mt-2 text-muted">Rencanakan pernikahan berdua, sederhana dan rapi.</p>
+        {kode && <p className="mt-3 rounded-input bg-mint-soft p-3 text-sm">Anda diundang bergabung. Masuk atau buat akun, lalu kode undangan akan terisi otomatis.</p>}
       </div>
       <form onSubmit={submit} className="space-y-4">
         <TextInput label="Email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />

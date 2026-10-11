@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { CancelBox } from "../cancel-box";
-import { Button, Card, ErrorNote, Loading, SelectInput, Sheet, StatusChip, TextInput } from "../ui";
+import { Button, Card, ErrorNote, Loading, SelectInput, Sheet, StatusChip, TextInput, MoneyInput } from "../ui";
 import { jakartaDate } from "@/domain/dates";
 import { formatRupiah, parseRupiah } from "@/domain/money";
 import { cancelRecord, getItem, markRefundReceived, recordPayment, updateRow } from "@/lib/api";
@@ -59,8 +59,8 @@ function Body({ weddingId, item, payments, vendors, onClose }: { weddingId: stri
 
       <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); savePrices.mutate(undefined); }}>
         <h3 className="font-bold">Detail</h3>
-        <TextInput label="Estimasi (Rp)" inputMode="numeric" value={est} onChange={(e) => edit({ est: e.target.value })} hint="Kosong berarti belum dianggarkan." />
-        <TextInput label="Harga final (Rp)" inputMode="numeric" value={fin} onChange={(e) => edit({ fin: e.target.value })} hint="Jika diisi, dipakai sebagai harga tagihan." />
+        <MoneyInput label="Estimasi (Rp)" inputMode="numeric" value={est} onChange={(e) => edit({ est: e.target.value })} hint="Kosong berarti belum dianggarkan." />
+        <MoneyInput label="Harga final (Rp)" inputMode="numeric" value={fin} onChange={(e) => edit({ fin: e.target.value })} hint="Jika diisi, dipakai sebagai harga tagihan." />
         <TextInput label="Jatuh tempo (opsional)" type="date" value={due} onChange={(e) => edit({ due: e.target.value })} />
         <SelectInput label="Vendor terkait (opsional)" value={vendor} onChange={(e) => edit({ vendor: e.target.value })}>
           <option value="">Tidak ada</option>
@@ -103,7 +103,7 @@ function Body({ weddingId, item, payments, vendors, onClose }: { weddingId: stri
             {payable.map((p) => <option key={p.id} value={p.id}>{p.paid_on} · {formatRupiah(p.amount)}</option>)}
           </SelectInput>
         )}
-        <TextInput label="Jumlah (Rp)" inputMode="numeric" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} error={pay.amount !== "" && (Number.isNaN(amount) || amount === 0) ? "Masukkan angka lebih dari 0." : null} />
+        <MoneyInput label="Jumlah (Rp)" inputMode="numeric" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} error={pay.amount !== "" && (Number.isNaN(amount) || amount === 0) ? "Masukkan angka lebih dari 0." : null} />
         <TextInput label="Tanggal" type="date" value={pay.date} onChange={(e) => setPay({ ...pay, date: e.target.value })} required />
         {pay.type === "payment" && (
           <SelectInput label="Sumber dana" value={pay.funding} onChange={(e) => setPay({ ...pay, funding: e.target.value as "wedding_fund" | "separate" })}>

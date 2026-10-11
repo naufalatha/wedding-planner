@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Button, Card, Empty, ErrorNote, Loading, SelectInput, Sheet, TextInput, useConfirm } from "@/components/ui";
+import { Button, Card, Empty, ErrorNote, Loading, SelectInput, Sheet, TextInput, useConfirm, MoneyInput } from "@/components/ui";
 import { formatRupiah, parseRupiah } from "@/domain/money";
 import { archiveRow, insertRow, selectVendor, updateRow } from "@/lib/api";
 import { useAction, useWeddingData } from "@/lib/hooks";
@@ -110,7 +110,7 @@ function VendorForm({ weddingId, v, categories, items, onClose }: { weddingId: s
       <TextInput label="Nama vendor" required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
       <SelectInput label="Status" value={f.status} onChange={(e) => setF({ ...f, status: e.target.value as Vendor["status"] })} >{Object.entries(STATUS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</SelectInput>
       {f.status === "selected" && v?.status !== "selected" && <p className="text-xs text-muted">Vendor terpilih lain di kategori ini akan kembali jadi kandidat.</p>}
-      <TextInput label="Penawaran harga (Rp)" inputMode="numeric" value={f.price} onChange={(e) => setF({ ...f, price: e.target.value })} error={badPrice ? "Hanya angka." : null} />
+      <MoneyInput label="Penawaran harga (Rp)" inputMode="numeric" value={f.price} onChange={(e) => setF({ ...f, price: e.target.value })} error={badPrice ? "Hanya angka." : null} />
       <TextInput label="Paket (opsional)" value={f.pkg} onChange={(e) => setF({ ...f, pkg: e.target.value })} />
       <TextInput label="Kontak (opsional)" value={f.contact} onChange={(e) => setF({ ...f, contact: e.target.value })} />
       <TextInput label="Tautan (opsional)" type="url" value={f.link} onChange={(e) => setF({ ...f, link: e.target.value })} />

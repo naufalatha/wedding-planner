@@ -99,7 +99,8 @@ await shot("03-keuangan");
 // 4. Catat pembayaran; percobaan pertama gagal, ulang memakai request ID yang SAMA
 await page.getByText("Gedung Contoh").click();
 const dlg = page.getByRole("dialog");
-await dlg.getByLabel("Jumlah (Rp)").fill("2.000.000");
+await dlg.getByLabel("Jumlah (Rp)").fill("2000000");
+assert.equal(await dlg.getByLabel("Jumlah (Rp)").inputValue(), "2.000.000", "nominal harus berpemisah ribuan otomatis");
 await dlg.getByRole("button", { name: "Simpan", exact: true }).last().click();
 await dlg.getByRole("alert").first().waitFor();
 await shot("04-pembayaran-gagal");

@@ -2,7 +2,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
-import { Button, Card, ErrorNote, Loading, TextInput } from "@/components/ui";
+import { Button, Card, ErrorNote, Loading, TextInput, MoneyInput } from "@/components/ui";
 import { createWedding, redeemInvitation } from "@/lib/api";
 import { useMembership, useSession } from "@/lib/hooks";
 import { parseRupiah } from "@/domain/money";
@@ -12,16 +12,17 @@ export default function Mulai() {
   const qc = useQueryClient();
   const { session, ready } = useSession();
   const membership = useMembership(Boolean(session));
-  const [tab, setTab] = useState<"buat" | "gabung">("buat");
+  const urlCode = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("kode") ?? "" : "";
+  const [tab, setTab] = useState<"buat" | "gabung">(urlCode ? "gabung" : "buat");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
-  const [f, setF] = useState({ groom: "", bride: "", date: "", location: "", target: "", opening: "", cap: "", code: "" });
+  const [f, setF] = useState({ groom: "", bride: "", date: "", location: "", target: "", opening: "", cap: "", code: urlCode });
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value });
 
   useEffect(() => {
-    if (ready && !session) router.replace("/masuk");
+    if (ready && !session) router.replace(urlCode ? `/masuk?kode=${encodeURIComponent(urlCode)}` : "/masuk");
     if (membership.data) router.replace("/beranda");
-  }, [ready, session, membership.data, router]);
+  }, [ready, session, membership.data, router, urlCode]);
   if (!ready || membership.isLoading || membership.data) return <Loading />;
 
   const money = (s: string) => parseRupiah(s);
@@ -55,16 +56,16 @@ export default function Mulai() {
           <TextInput label="Nama mempelai wanita" required value={f.bride} onChange={set("bride")} />
           <TextInput label="Tanggal pernikahan" type="date" value={f.date} onChange={set("date")} hint="Boleh dikosongkan dulu." />
           <TextInput label="Lokasi" value={f.location} onChange={set("location")} />
-          <TextInput label="Target dana (Rp)" inputMode="numeric" value={f.target} onChange={set("target")} error={bad(f.target) ? "Hanya angka." : null} />
-          <TextInput label="Saldo awal (Rp)" inputMode="numeric" value={f.opening} onChange={set("opening")} error={bad(f.opening) ? "Hanya angka." : null} hint="Kosong dianggap Rp0." />
-          <TextInput label="Batas anggaran rencana (Rp)" inputMode="numeric" value={f.cap} onChange={set("cap")} error={bad(f.cap) ? "Hanya angka." : null} />
+          <MoneyInput label="Target dana (Rp)" inputMode="numeric" value={f.target} onChange={set("target")} error={bad(f.target) ? "Hanya angka." : null} />
+          <MoneyInput label="Saldo awal (Rp)" inputMode="numeric" value={f.opening} onChange={set("opening")} error={bad(f.opening) ? "Hanya angka." : null} hint="Kosong dianggap Rp0." />
+          <MoneyInput label="Batas anggaran rencana (Rp)" inputMode="numeric" value={f.cap} onChange={set("cap")} error={bad(f.cap) ? "Hanya angka." : null} />
           <ErrorNote error={error} />
           <Button type="submit" className="w-full" disabled={busy || bad(f.target) || bad(f.opening) || bad(f.cap)}>{busy ? "Menyimpan…" : "Buat pernikahan"}</Button>
         </form>
       ) : (
         <form onSubmit={join} className="space-y-4">
           <Card tone="mint"><p className="text-sm">Minta pasangan membuka <b>Akun</b> → <b>Undang pasangan</b>. Kodenya berlaku 7 hari dan hanya bisa dipakai sekali.</p></Card>
-          <TextInput label="Kode undangan" required autoCapitalize="characters" value={f.code} onChange={set("code")} />
+          <TextInput label="Kode undangan" required autoCapitalize="characters" autoComplete="off" spellCheck={false} className="font-mono tracking-widest" value={f.code} onChange={(e) => setF({ ...f, code: e.target.value.toUpperCase() })} />
           <ErrorNote error={error} />
           <Button type="submit" className="w-full" disabled={busy}>{busy ? "Memeriksa…" : "Gabung"}</Button>
         </form>

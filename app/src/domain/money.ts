@@ -26,3 +26,9 @@ export function parseRupiah(input: string): Rupiah | null {
   const n = Number(digits);
   return Number.isSafeInteger(n) ? n : Number.NaN;
 }
+
+/** Ketikan pengguna -> digit dengan pemisah ribuan titik ("1500000" -> "1.500.000"). Selain digit dibuang. */
+export function groupDigits(input: string): string {
+  const digits = input.replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}

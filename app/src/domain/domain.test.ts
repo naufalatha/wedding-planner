@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatRupiah, parseRupiah } from "./money";
+import { formatRupiah, groupDigits, parseRupiah } from "./money";
 import { committedPrice, fundSummary, netPaid, paymentStatus, planRemaining, remainingBill } from "./finance";
 import { duplicateNames, guestSummary, validateAttendance } from "./guests";
 import { contributorTotals, nearestBills, nearestOpenTasks } from "./home";
@@ -150,5 +150,18 @@ describe("beranda & kontributor", () => {
     expect(validateAttendance({ invitedCount: 2, confirmedCount: null, rsvp: "attending" })).toBeNull();
     expect(guestSummary([{ invitedCount: 2, confirmedCount: null, invitationSent: true, rsvp: "attending" }]).attendingWithoutCount).toBe(1);
     expect([...duplicateNames(["Tamu  Satu", "tamu satu", "Lain"])]).toEqual(["tamu satu"]);
+  });
+});
+
+describe("groupDigits (input nominal)", () => {
+  it("memberi pemisah ribuan dan membuang karakter lain", () => {
+    expect(groupDigits("1500000")).toBe("1.500.000");
+    expect(groupDigits("Rp 42.000.000")).toBe("42.000.000");
+    expect(groupDigits("abc")).toBe("");
+    expect(groupDigits("007")).toBe("7");
+    expect(groupDigits("0")).toBe("0");
+  });
+  it("hasilnya tetap bisa diurai kembali", () => {
+    expect(parseRupiah(groupDigits("9500000"))).toBe(9_500_000);
   });
 });

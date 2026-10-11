@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useId, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { groupDigits } from "@/domain/money";
 import { friendlyError } from "@/lib/errors";
 
 export function cx(...c: (string | false | null | undefined)[]) { return c.filter(Boolean).join(" "); }
@@ -41,6 +42,14 @@ export const inputCls = "min-h-12 w-full rounded-input border border-line bg-sur
 
 export function TextInput({ label, hint, error, ...p }: React.InputHTMLAttributes<HTMLInputElement> & { label: string; hint?: string; error?: string | null }) {
   return <Field label={label} hint={hint} error={error}>{(id) => <input id={id} {...p} className={cx(inputCls, p.className)} />}</Field>;
+}
+
+/** Input nominal: pemisah ribuan otomatis saat mengetik. Nilai yang dilaporkan sudah berpemisah; parseRupiah menanganinya. */
+export function MoneyInput({ value, onChange, ...p }: React.InputHTMLAttributes<HTMLInputElement> & { label: string; hint?: string; error?: string | null; value: string }) {
+  return (
+    <TextInput {...p} inputMode="numeric" autoComplete="off" placeholder={p.placeholder ?? "0"} value={groupDigits(value)}
+      onChange={(e) => { e.target.value = groupDigits(e.target.value); onChange?.(e); }} />
+  );
 }
 
 export function SelectInput({ label, children, ...p }: React.SelectHTMLAttributes<HTMLSelectElement> & { label: string }) {

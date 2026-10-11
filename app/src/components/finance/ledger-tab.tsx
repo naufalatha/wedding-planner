@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { CancelBox } from "../cancel-box";
-import { Button, Card, Empty, ErrorNote, Sheet, TextInput } from "../ui";
+import { Button, Card, Empty, ErrorNote, Sheet, TextInput, MoneyInput } from "../ui";
 import { jakartaDate } from "@/domain/dates";
 import { formatRupiah, parseRupiah } from "@/domain/money";
 import { cancelRecord, insertRow, updateRow } from "@/lib/api";
@@ -58,7 +58,7 @@ function LedgerForm({ kind, weddingId, row, onClose }: { kind: "deposit" | "with
     <div className="space-y-4">
       <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); save.mutate(undefined); }}>
         {kind === "deposit" && <TextInput label="Penyetor" required value={f.who} onChange={(e) => setF({ ...f, who: e.target.value })} hint="Mis. Naufal, Bella, Orang tua." />}
-        <TextInput label="Jumlah (Rp)" inputMode="numeric" value={f.amount} onChange={(e) => setF({ ...f, amount: e.target.value })} error={f.amount !== "" && !amountOk ? "Masukkan angka lebih dari 0." : null} />
+        <MoneyInput label="Jumlah (Rp)" inputMode="numeric" value={f.amount} onChange={(e) => setF({ ...f, amount: e.target.value })} error={f.amount !== "" && !amountOk ? "Masukkan angka lebih dari 0." : null} />
         <TextInput label="Tanggal" type="date" required value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} />
         <TextInput label="Catatan (opsional)" value={f.note} onChange={(e) => setF({ ...f, note: e.target.value })} />
         <ErrorNote error={save.error} />

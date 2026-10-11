@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { ItemSheet } from "@/components/finance/item-sheet";
 import { LedgerTab } from "@/components/finance/ledger-tab";
-import { Button, Card, Chip, Empty, ErrorNote, Loading, ProgressBar, SelectInput, Sheet, StatusChip, TextInput } from "@/components/ui";
+import { Button, Card, Chip, Empty, ErrorNote, Loading, ProgressBar, SelectInput, Sheet, StatusChip, TextInput, MoneyInput } from "@/components/ui";
 import { formatRupiah, parseRupiah } from "@/domain/money";
 import { insertRow } from "@/lib/api";
 import { formatShortDate } from "@/domain/dates";
@@ -111,8 +111,8 @@ export default function Keuangan() {
           </SelectInput>
           <TextInput label="Nama" required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
           <TextInput label="Kategori (opsional)" value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })} />
-          <TextInput label="Estimasi (Rp)" inputMode="numeric" value={f.est} onChange={(e) => setF({ ...f, est: e.target.value })} hint="Boleh dikosongkan." />
-          <TextInput label="Harga final (Rp)" inputMode="numeric" value={f.fin} onChange={(e) => setF({ ...f, fin: e.target.value })} hint="Boleh dikosongkan." />
+          <MoneyInput label="Estimasi (Rp)" inputMode="numeric" value={f.est} onChange={(e) => setF({ ...f, est: e.target.value })} hint="Boleh dikosongkan." />
+          <MoneyInput label="Harga final (Rp)" inputMode="numeric" value={f.fin} onChange={(e) => setF({ ...f, fin: e.target.value })} hint="Boleh dikosongkan." />
           <TextInput label="Jatuh tempo (opsional)" type="date" value={f.due} onChange={(e) => setF({ ...f, due: e.target.value })} />
           <SelectInput label="Vendor terkait (opsional)" value={f.vendor} onChange={(e) => setF({ ...f, vendor: e.target.value })}>
             <option value="">Tidak ada</option>
