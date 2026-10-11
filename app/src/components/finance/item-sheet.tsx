@@ -57,18 +57,31 @@ function Body({ weddingId, item, payments, vendors, onClose }: { weddingId: stri
         </dl>
       </Card>
 
-      <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); savePrices.mutate(undefined); }}>
-        <h3 className="font-bold">Detail</h3>
-        <MoneyInput label="Estimasi (Rp)" inputMode="numeric" value={est} onChange={(e) => edit({ est: e.target.value })} hint="Kosong berarti belum dianggarkan." />
-        <MoneyInput label="Harga final (Rp)" inputMode="numeric" value={fin} onChange={(e) => edit({ fin: e.target.value })} hint="Jika diisi, dipakai sebagai harga tagihan." />
-        <TextInput label="Jatuh tempo (opsional)" type="date" value={due} onChange={(e) => edit({ due: e.target.value })} />
-        <SelectInput label="Vendor terkait (opsional)" value={vendor} onChange={(e) => edit({ vendor: e.target.value })}>
-          <option value="">Tidak ada</option>
-          {vendors.map((v) => <option key={v.id} value={v.id}>{v.category} · {v.name}</option>)}
+      <form className="space-y-3 rounded-card border border-line bg-surface p-4" onSubmit={(e) => { e.preventDefault(); addPayment.mutate(undefined); }}>
+        <h3 className="font-bold">Catat {pay.type === "payment" ? "pembayaran" : "refund"}</h3>
+        <SelectInput label="Jenis" value={pay.type} onChange={(e) => setPay({ ...pay, type: e.target.value as "payment" | "refund" })}>
+          <option value="payment">Pembayaran</option>
+          <option value="refund">Refund</option>
         </SelectInput>
-        {badPrice && <p role="alert" className="text-xs text-danger">Nominal hanya boleh angka.</p>}
-        <ErrorNote error={savePrices.error} />
-        <Button type="submit" variant="secondary" disabled={!prices || badPrice || savePrices.isPending || !row.data}>Simpan detail</Button>
+        {pay.type === "refund" && (
+          <SelectInput label="Refund dari pembayaran" value={pay.parent} onChange={(e) => setPay({ ...pay, parent: e.target.value })}>
+            <option value="">Pilih pembayaran…</option>
+            {payable.map((p) => <option key={p.id} value={p.id}>{p.paid_on} · {formatRupiah(p.amount)}</option>)}
+          </SelectInput>
+        )}
+        <MoneyInput label="Jumlah (Rp)" inputMode="numeric" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} error={pay.amount !== "" && (Number.isNaN(amount) || amount === 0) ? "Masukkan angka lebih dari 0." : null} />
+        {pay.type === "payment" && item.remaining !== null && item.remaining > 0 && <button type="button" className="-mt-1 min-h-12 rounded-full border border-line px-4 text-sm" onClick={() => setPay({ ...pay, amount: String(item.remaining) })}>Isi sisa tagihan ({formatRupiah(item.remaining)})</button>}
+        <TextInput label="Tanggal" type="date" value={pay.date} onChange={(e) => setPay({ ...pay, date: e.target.value })} required />
+        {pay.type === "payment" && (
+          <SelectInput label="Sumber dana" value={pay.funding} onChange={(e) => setPay({ ...pay, funding: e.target.value as "wedding_fund" | "separate" })}>
+            <option value="wedding_fund">Dana pernikahan</option>
+            <option value="separate">Dibayar terpisah</option>
+          </SelectInput>
+        )}
+        <TextInput label="Catatan (opsional)" value={pay.note} onChange={(e) => setPay({ ...pay, note: e.target.value })} />
+        <ErrorNote error={addPayment.error ?? received.error} />
+        <Button type="submit" className="w-full" disabled={!amountOk || addPayment.isPending}>{addPayment.isPending ? "Menyimpan…" : "Simpan"}</Button>
+        {addPayment.isError && <p className="text-xs text-muted">Isian Anda dipertahankan. Menekan Simpan lagi aman: tidak akan tercatat dua kali.</p>}
       </form>
 
       <section className="space-y-3">
@@ -91,30 +104,18 @@ function Body({ weddingId, item, payments, vendors, onClose }: { weddingId: stri
         ))}
       </section>
 
-      <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); addPayment.mutate(undefined); }}>
-        <h3 className="font-bold">Catat {pay.type === "payment" ? "pembayaran" : "refund"}</h3>
-        <SelectInput label="Jenis" value={pay.type} onChange={(e) => setPay({ ...pay, type: e.target.value as "payment" | "refund" })}>
-          <option value="payment">Pembayaran</option>
-          <option value="refund">Refund</option>
+      <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); savePrices.mutate(undefined); }}>
+        <h3 className="font-bold">Detail</h3>
+        <MoneyInput label="Estimasi (Rp)" inputMode="numeric" value={est} onChange={(e) => edit({ est: e.target.value })} hint="Kosong berarti belum dianggarkan." />
+        <MoneyInput label="Harga final (Rp)" inputMode="numeric" value={fin} onChange={(e) => edit({ fin: e.target.value })} hint="Jika diisi, dipakai sebagai harga tagihan." />
+        <TextInput label="Jatuh tempo (opsional)" type="date" value={due} onChange={(e) => edit({ due: e.target.value })} />
+        <SelectInput label="Vendor terkait (opsional)" value={vendor} onChange={(e) => edit({ vendor: e.target.value })}>
+          <option value="">Tidak ada</option>
+          {vendors.map((v) => <option key={v.id} value={v.id}>{v.category} · {v.name}</option>)}
         </SelectInput>
-        {pay.type === "refund" && (
-          <SelectInput label="Refund dari pembayaran" value={pay.parent} onChange={(e) => setPay({ ...pay, parent: e.target.value })}>
-            <option value="">Pilih pembayaran…</option>
-            {payable.map((p) => <option key={p.id} value={p.id}>{p.paid_on} · {formatRupiah(p.amount)}</option>)}
-          </SelectInput>
-        )}
-        <MoneyInput label="Jumlah (Rp)" inputMode="numeric" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} error={pay.amount !== "" && (Number.isNaN(amount) || amount === 0) ? "Masukkan angka lebih dari 0." : null} />
-        <TextInput label="Tanggal" type="date" value={pay.date} onChange={(e) => setPay({ ...pay, date: e.target.value })} required />
-        {pay.type === "payment" && (
-          <SelectInput label="Sumber dana" value={pay.funding} onChange={(e) => setPay({ ...pay, funding: e.target.value as "wedding_fund" | "separate" })}>
-            <option value="wedding_fund">Dana pernikahan</option>
-            <option value="separate">Dibayar terpisah</option>
-          </SelectInput>
-        )}
-        <TextInput label="Catatan (opsional)" value={pay.note} onChange={(e) => setPay({ ...pay, note: e.target.value })} />
-        <ErrorNote error={addPayment.error ?? received.error} />
-        <Button type="submit" className="w-full" disabled={!amountOk || addPayment.isPending}>{addPayment.isPending ? "Menyimpan…" : "Simpan"}</Button>
-        {addPayment.isError && <p className="text-xs text-muted">Isian Anda dipertahankan. Menekan Simpan lagi aman: tidak akan tercatat dua kali.</p>}
+        {badPrice && <p role="alert" className="text-xs text-danger">Nominal hanya boleh angka.</p>}
+        <ErrorNote error={savePrices.error} />
+        <Button type="submit" variant="secondary" disabled={!prices || badPrice || savePrices.isPending || !row.data}>Simpan detail</Button>
       </form>
 
       <CancelBox label="Batalkan item ini" pending={cancelItem.isPending} error={cancelItem.error} onConfirm={(r) => cancelItem.mutate(r)} />

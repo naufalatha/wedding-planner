@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { ItemSheet } from "@/components/finance/item-sheet";
+import { EMPTY_FILTER, ItemFilters, SECTION_LABEL as SECTION, filterItems, type ItemFilter } from "@/components/finance/item-filters";
 import { LedgerTab } from "@/components/finance/ledger-tab";
 import { Button, Card, Chip, Empty, ErrorNote, ProgressBar, SelectInput, Sheet, StatusChip, TextInput, MoneyInput, ListSkeleton } from "@/components/ui";
 import { formatRupiah, parseRupiah } from "@/domain/money";
@@ -10,14 +11,14 @@ import { useAction, useWeddingData } from "@/lib/hooks";
 import type { BudgetItemStatusRow, Section } from "@/lib/types";
 import { useWedding } from "@/lib/wedding-context";
 
-const SECTION: Record<Section, string> = { paperwork: "Berkas", seserahan: "Seserahan", vendor: "Vendor", other: "Lainnya" };
-
 export default function Keuangan() {
   const { weddingId } = useWedding();
   const d = useWeddingData(weddingId);
   const [tab, setTab] = useState<"item" | "setoran" | "penarikan">("item");
   const [sel, setSel] = useState<BudgetItemStatusRow | null>(null);
   const [adding, setAdding] = useState(false);
+  const [flt, setFlt] = useState<ItemFilter>(EMPTY_FILTER);
+  const [payFlt, setPayFlt] = useState<ItemFilter>(EMPTY_FILTER);
   const [quickPay, setQuickPay] = useState(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).has("bayar"));
   const [f, setF] = useState({ section: "vendor" as Section, category: "", name: "", est: "", fin: "", due: "", vendor: "" });
   const bad = [f.est, f.fin].some((v) => v !== "" && Number.isNaN(parseRupiah(v)));
@@ -32,7 +33,9 @@ export default function Keuangan() {
   if (!d.summary.data || !d.items.data) return <ListSkeleton summary rows={4} />;
   const s = d.summary.data;
   const items = d.items.data;
-  const sections = (Object.keys(SECTION) as Section[]).map((k) => [k, items.filter((i) => i.section === k)] as const).filter(([, v]) => v.length > 0);
+  const shownItems = filterItems(items, flt);
+  const sections = (Object.keys(SECTION) as Section[]).map((k) => [k, shownItems.filter((i) => i.section === k)] as const).filter(([, v]) => v.length > 0);
+  const payable = filterItems(items.filter((i) => i.status !== "lunas"), payFlt);
   // item yang masih terbuka diperbarui dari data terbaru agar status ikut berubah
   const live = sel ? items.find((i) => i.budget_item_id === sel.budget_item_id) ?? null : null;
 
@@ -74,10 +77,12 @@ export default function Keuangan() {
       {tab === "item" && (
         <div className="space-y-5">
           <Button className="w-full" onClick={() => setAdding(true)}>Tambah item</Button>
-          {sections.length === 0 && <Empty title="Belum ada item" hint="Tambahkan vendor, seserahan, atau berkas yang punya biaya." />}
+          {items.length > 0 && <ItemFilters items={items} value={flt} onChange={setFlt} shown={shownItems.length} />}
+          {items.length === 0 && <Empty title="Belum ada item" hint="Tambahkan vendor, seserahan, atau berkas yang punya biaya." />}
+          {items.length > 0 && sections.length === 0 && <Empty title="Tidak ada item yang cocok" hint="Ubah atau reset filter." />}
           {sections.map(([k, list]) => (
             <section key={k} aria-label={SECTION[k]} className="space-y-2">
-              <h2 className="text-sm font-semibold text-muted">{SECTION[k]}</h2>
+              <h2 className="text-sm font-semibold text-muted">{SECTION[k]} <span className="font-normal">({list.length})</span></h2>
               {list.map((i) => (
                 <button key={i.budget_item_id} onClick={() => setSel(i)} className="block min-h-12 w-full rounded-card border border-line bg-surface p-4 text-left">
                   <div className="flex items-start justify-between gap-3">
@@ -97,9 +102,10 @@ export default function Keuangan() {
 
       <ItemSheet weddingId={weddingId} item={live} payments={d.payments.data ?? []} vendors={d.vendors.data ?? []} onClose={() => setSel(null)} />
       <Sheet open={quickPay} title="Catat pembayaran untuk…" onClose={() => setQuickPay(false)}>
+        <div className="mb-3"><ItemFilters compact items={items.filter((i) => i.status !== "lunas")} value={payFlt} onChange={setPayFlt} shown={payable.length} /></div>
         <ul className="space-y-2">
-          {items.filter((i) => i.status !== "lunas").map((i) => (
-            <li key={i.budget_item_id}><button onClick={() => { setQuickPay(false); setSel(i); }} className="flex min-h-12 w-full items-center justify-between gap-3 rounded-card border border-line bg-surface p-4 text-left"><span className="min-w-0 font-medium">{i.name}</span><StatusChip status={i.status} /></button></li>
+          {payable.map((i) => (
+            <li key={i.budget_item_id}><button onClick={() => { setQuickPay(false); setSel(i); }} className="flex min-h-12 w-full items-center justify-between gap-3 rounded-card border border-line bg-surface p-4 text-left"><span className="min-w-0"><span className="block truncate font-medium">{i.name}</span>{i.category && <span className="block truncate text-xs text-muted">{i.category}</span>}</span><StatusChip status={i.status} /></button></li>
           ))}
           {items.every((i) => i.status === "lunas") && <li className="text-sm text-muted">Belum ada item yang perlu dibayar. Tambahkan item dulu.</li>}
         </ul>
