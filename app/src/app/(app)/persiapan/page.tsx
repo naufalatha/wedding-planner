@@ -1,5 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
+import { ResultCount } from "@/components/result-count";
 import { Button, Card, Chip, Empty, ErrorNote, ProgressBar, SelectInput, Sheet, TextInput, useConfirm, ListSkeleton } from "@/components/ui";
 import { jakartaDate } from "@/domain/dates";
 import { matchesFilter, taskProgress, type TaskFilter } from "@/domain/tasks";
@@ -9,17 +10,21 @@ import type { Member, Phase, PrepTask } from "@/lib/types";
 import { useWedding } from "@/lib/wedding-context";
 
 const PHASES: [Phase, string][] = [["12plus", "12+ bulan sebelum"], ["6to12", "6–12 bulan sebelum"], ["3to6", "3–6 bulan sebelum"], ["1to3", "1–3 bulan sebelum"], ["1to2w", "1–2 minggu sebelum"], ["1w", "1 minggu sebelum"], ["1d", "1 hari sebelum"], ["dday", "Hari H"]];
-const FILTERS: [TaskFilter, string][] = [["all", "Semua"], ["mine", "Milik saya"], ["overdue", "Terlambat"], ["done", "Selesai"]];
+const FILTERS: [TaskFilter, string][] = [["all", "Semua"], ["todo", "Belum selesai"], ["mine", "Milik saya"], ["overdue", "Terlambat"], ["done", "Selesai"]];
 
 export default function Persiapan() {
   const { weddingId, userId } = useWedding();
   const { tasks, members } = useWeddingData(weddingId);
   const [editing, setEditing] = useState<PrepTask | "new" | null>(() => (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("baru") ? "new" : null));
   const [filter, setFilter] = useState<TaskFilter>("all");
+  const [q, setQ] = useState("");
+  const [phase, setPhase] = useState<Phase | "">("");
+  const [high, setHigh] = useState(false);
   const toggle = useAction((t: PrepTask) => updateRow("prep_tasks", t.id, t.revision, { done: !t.done }));
   const all = useMemo(() => tasks.data ?? [], [tasks.data]);
   const today = jakartaDate(new Date());
   const like = (t: PrepTask) => ({ done: t.done, deadline: t.deadline, assigneeId: t.assignee_id });
+  const ok = (t: PrepTask) => matchesFilter(like(t), filter, userId, today) && (phase === "" || t.phase === phase) && (!high || t.priority === "high") && (q.trim() === "" || `${t.title} ${t.notes ?? ""}`.toLowerCase().includes(q.trim().toLowerCase()));
   const progress = useMemo(() => taskProgress(all.map(like)), [all]);
   if (tasks.error) return <ErrorNote error={tasks.error} />;
   if (!tasks.data) return <ListSkeleton summary rows={5} />;
@@ -38,16 +43,29 @@ export default function Persiapan() {
         )}
       </Card>
       <Button className="w-full" onClick={() => setEditing("new")}>Tambah tugas</Button>
-      <div className="flex gap-2 overflow-x-auto pb-1">{FILTERS.map(([id, l]) => <Chip key={id} active={filter === id} onClick={() => setFilter(id)}>{l}</Chip>)}</div>
+      {all.length > 0 && (
+        <div className="space-y-3">
+          <TextInput label="Cari tugas" type="search" placeholder="Judul atau catatan" value={q} onChange={(e) => setQ(e.target.value)} />
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Filter tugas">
+            {FILTERS.map(([id, l]) => <Chip key={id} active={filter === id} onClick={() => setFilter(id)}>{l}</Chip>)}
+            <Chip active={high} onClick={() => setHigh(!high)}>Prioritas tinggi</Chip>
+          </div>
+          <SelectInput label="Fase" value={phase} onChange={(e) => setPhase(e.target.value as Phase | "")}>
+            <option value="">Semua fase</option>
+            {PHASES.filter(([id]) => all.some((t) => t.phase === id)).map(([id, l]) => <option key={id} value={id}>{l}</option>)}
+          </SelectInput>
+          <ResultCount shown={all.filter(ok).length} total={all.length} active={filter !== "all" || q !== "" || phase !== "" || high} onReset={() => { setFilter("all"); setQ(""); setPhase(""); setHigh(false); }} />
+        </div>
+      )}
       <ErrorNote error={toggle.error} />
       {all.length === 0 && <Empty title="Belum ada tugas" hint="Tambahkan hal yang perlu disiapkan, dikelompokkan menurut waktunya." />}
-      {all.length > 0 && !all.some((t) => matchesFilter(like(t), filter, userId, today)) && <Empty title="Tidak ada tugas pada filter ini" />}
+      {all.length > 0 && !all.some(ok) && <Empty title="Tidak ada tugas pada filter ini" />}
       {PHASES.map(([id, label]) => {
-        const list = all.filter((t) => t.phase === id && matchesFilter(like(t), filter, userId, today));
+        const list = all.filter((t) => t.phase === id && ok(t));
         if (list.length === 0) return null;
         return (
           <section key={id} aria-label={label} className="space-y-2">
-            <h2 className="text-sm font-semibold text-muted">{label}</h2>
+            <h2 className="text-sm font-semibold text-muted">{label} <span className="font-normal">({list.length})</span></h2>
             {list.map((t) => {
               const meta = [t.deadline, who(t.assignee_id), t.priority === "high" ? "Prioritas tinggi" : null].filter(Boolean).join(" · ");
               return (

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { Button, Card, Empty, ErrorNote, SelectInput, Sheet, TextInput, useConfirm, MoneyInput, ListSkeleton } from "@/components/ui";
+import { ResultCount } from "@/components/result-count";
+import { Button, Chip, Card, Empty, ErrorNote, SelectInput, Sheet, TextInput, useConfirm, MoneyInput, ListSkeleton } from "@/components/ui";
 import { formatRupiah, parseRupiah } from "@/domain/money";
 import { archiveRow, insertRow, selectVendor, updateRow } from "@/lib/api";
 import { useAction, useWeddingData } from "@/lib/hooks";
@@ -16,19 +17,40 @@ export default function VendorPage() {
   const { vendors, items } = useWeddingData(weddingId);
   const [editing, setEditing] = useState<Vendor | "new" | null>(null);
   const [comparing, setComparing] = useState<string | null>(null);
+  const [q, setQ] = useState("");
+  const [st, setSt] = useState<Vendor["status"] | "all">("all");
+  const [cat, setCat] = useState("");
   if (vendors.error) return <ErrorNote error={vendors.error} />;
   if (!vendors.data) return <ListSkeleton rows={4} />;
   const cats = [...new Set(vendors.data.map((v) => v.category))];
+  const match = (v: Vendor) => (st === "all" || v.status === st) && (cat === "" || v.category === cat) && (q.trim() === "" || `${v.name} ${v.package ?? ""} ${v.notes ?? ""}`.toLowerCase().includes(q.trim().toLowerCase()));
+  const shown = vendors.data.filter(match);
   const compareList = comparing ? vendors.data.filter((v) => v.category === comparing && v.status !== "rejected") : [];
   return (
     <div className="space-y-4">
       <h1 className="text-3xl font-extrabold tracking-tight">Vendor</h1>
       <Button className="w-full" onClick={() => setEditing("new")}>Tambah vendor</Button>
+      {vendors.data.length > 0 && (
+        <div className="space-y-3">
+          <TextInput label="Cari vendor" type="search" placeholder="Nama, paket, atau catatan" value={q} onChange={(e) => setQ(e.target.value)} />
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Status vendor">
+            <Chip active={st === "all"} onClick={() => setSt("all")}>Semua</Chip>
+            {(Object.keys(STATUS) as Vendor["status"][]).map((k) => <Chip key={k} active={st === k} onClick={() => setSt(k)}>{STATUS[k]}</Chip>)}
+          </div>
+          <SelectInput label="Kategori" value={cat} onChange={(e) => setCat(e.target.value)}>
+            <option value="">Semua kategori</option>
+            {cats.map((c) => <option key={c} value={c}>{c}</option>)}
+          </SelectInput>
+          <ResultCount shown={shown.length} total={vendors.data.length} active={q !== "" || st !== "all" || cat !== ""} onReset={() => { setQ(""); setSt("all"); setCat(""); }} />
+        </div>
+      )}
       {cats.length === 0 && <Empty title="Belum ada vendor" hint="Catat kandidat per kategori, bandingkan, lalu pilih satu." />}
+      {vendors.data.length > 0 && shown.length === 0 && <Empty title="Tidak ada vendor yang cocok" hint="Ubah atau reset filter." />}
       {cats.map((c) => {
-        const list = vendors.data.filter((v) => v.category === c);
-        const chosen = list.find((v) => v.status === "selected");
-        const open = list.filter((v) => v.status !== "rejected");
+        const list = shown.filter((v) => v.category === c);
+        if (list.length === 0) return null;
+        const chosen = vendors.data.find((v) => v.category === c && v.status === "selected");
+        const open = vendors.data.filter((v) => v.category === c).filter((v) => v.status !== "rejected");
         return (
           <section key={c} aria-label={c} className="space-y-2">
             <div className="flex items-center justify-between gap-2">

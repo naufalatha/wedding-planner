@@ -129,6 +129,8 @@ describe("tugas", () => {
     expect(isOverdue(t({ deadline: "2026-10-10", done: true }), "2026-10-11")).toBe(false);
     expect(matchesFilter(t({ assigneeId: "me" }), "mine", "me", "2026-10-11")).toBe(true);
     expect(matchesFilter(t({ assigneeId: "other" }), "mine", "me", "2026-10-11")).toBe(false);
+    expect(matchesFilter(t({ done: false }), "todo", "me", "2026-10-11")).toBe(true);
+    expect(matchesFilter(t({ done: true }), "todo", "me", "2026-10-11")).toBe(false);
     expect(matchesFilter(t({ archived: true, done: true }), "done", "me", "2026-10-11")).toBe(false);
   });
 });

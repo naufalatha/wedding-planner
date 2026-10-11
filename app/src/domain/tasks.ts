@@ -10,11 +10,12 @@ export function taskProgress(tasks: readonly TaskLike[]): { done: number; total:
 /** Terlambat = belum selesai dan tenggat sebelum hari ini (tanggal kalender Jakarta, YYYY-MM-DD). */
 export const isOverdue = (t: Pick<TaskLike, "done" | "deadline">, today: string) => !t.done && t.deadline !== null && t.deadline < today;
 
-export type TaskFilter = "all" | "mine" | "overdue" | "done";
+export type TaskFilter = "all" | "todo" | "mine" | "overdue" | "done";
 export function matchesFilter(t: TaskLike, f: TaskFilter, me: string, today: string): boolean {
   if (t.archived) return false;
   switch (f) {
     case "all": return true;
+    case "todo": return !t.done;
     case "mine": return t.assigneeId === me;
     case "overdue": return isOverdue(t, today);
     case "done": return t.done;

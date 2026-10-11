@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { CancelBox } from "../cancel-box";
-import { Button, Card, Empty, ErrorNote, Sheet, TextInput, MoneyInput } from "../ui";
+import { ResultCount } from "../result-count";
+import { Button, Card, Empty, ErrorNote, SelectInput, Sheet, TextInput, MoneyInput } from "../ui";
 import { jakartaDate } from "@/domain/dates";
 import { formatRupiah, parseRupiah } from "@/domain/money";
 import { cancelRecord, insertRow, updateRow } from "@/lib/api";
@@ -10,13 +11,23 @@ import { useAction } from "@/lib/hooks";
 import type { Deposit, Withdrawal } from "@/lib/types";
 
 type Row = Deposit | Withdrawal;
+const formatMonth = (ym: string) => new Date(`${ym}-01T00:00:00Z`).toLocaleDateString("id-ID", { month: "long", year: "numeric", timeZone: "UTC" });
 const isDeposit = (r: Row): r is Deposit => "contributor" in r;
 
 /** Setoran (masuk) atau penarikan lain (keluar) dari dana pernikahan. */
 export function LedgerTab({ kind, weddingId, rows }: { kind: "deposit" | "withdrawal"; weddingId: string; rows: Row[] }) {
   const [editing, setEditing] = useState<Row | "new" | null>(null);
   const noun = kind === "deposit" ? "Setoran" : "Penarikan";
+  const [q, setQ] = useState("");
+  const [month, setMonth] = useState("");
+  const [who, setWho] = useState("");
+  const dateOf = (r: Row) => (isDeposit(r) ? r.deposited_on : r.withdrawn_on);
+  const months = [...new Set(rows.map((r) => dateOf(r).slice(0, 7)))].sort().reverse();
+  const people = [...new Set(rows.filter(isDeposit).map((r) => r.contributor))].sort((a, b) => a.localeCompare(b));
+  const shown = rows.filter((r) => (month === "" || dateOf(r).startsWith(month)) && (who === "" || (isDeposit(r) && r.contributor === who)) && (q.trim() === "" || `${isDeposit(r) ? r.contributor : ""} ${r.note ?? ""}`.toLowerCase().includes(q.trim().toLowerCase())));
+  const filtered = q !== "" || month !== "" || who !== "";
   const totals = kind === "deposit" ? contributorTotals(rows.filter(isDeposit)) : [];
+  const sum = shown.reduce((a, r) => a + r.amount, 0);
   return (
     <div className="space-y-3">
       <Button className="w-full" onClick={() => setEditing("new")}>Tambah {noun.toLowerCase()}</Button>
@@ -26,8 +37,28 @@ export function LedgerTab({ kind, weddingId, rows }: { kind: "deposit" | "withdr
           <ul className="space-y-1">{totals.map((t) => <li key={t.name} className="flex justify-between text-sm"><span>{t.name}</span><span className="font-semibold">{formatRupiah(t.total)}</span></li>)}</ul>
         </Card>
       )}
+      {rows.length > 3 && (
+        <div className="space-y-3">
+          <TextInput label="Cari" type="search" placeholder={kind === "deposit" ? "Penyetor atau catatan" : "Catatan"} value={q} onChange={(e) => setQ(e.target.value)} />
+          <div className={kind === "deposit" && people.length > 1 ? "grid grid-cols-2 gap-3" : ""}>
+            <SelectInput label="Bulan" value={month} onChange={(e) => setMonth(e.target.value)}>
+              <option value="">Semua bulan</option>
+              {months.map((m) => <option key={m} value={m}>{formatMonth(m)}</option>)}
+            </SelectInput>
+            {kind === "deposit" && people.length > 1 && (
+              <SelectInput label="Penyetor" value={who} onChange={(e) => setWho(e.target.value)}>
+                <option value="">Semua</option>
+                {people.map((p) => <option key={p} value={p}>{p}</option>)}
+              </SelectInput>
+            )}
+          </div>
+          <ResultCount shown={shown.length} total={rows.length} active={filtered} onReset={() => { setQ(""); setMonth(""); setWho(""); }} />
+          {filtered && shown.length > 0 && <p className="text-sm">Total tampil: <span className="font-semibold">{formatRupiah(sum)}</span></p>}
+        </div>
+      )}
+      {rows.length > 0 && shown.length === 0 && <Empty title="Tidak ada catatan yang cocok" hint="Ubah atau reset filter." />}
       {rows.length === 0 && <Empty title={`Belum ada ${noun.toLowerCase()}`} hint={kind === "deposit" ? "Catat setiap tabungan yang masuk ke dana pernikahan." : "Untuk pengeluaran dana di luar pembayaran item."} />}
-      {rows.map((r) => (
+      {shown.map((r) => (
         <button key={r.id} onClick={() => setEditing(r)} className="block min-h-12 w-full rounded-card border border-line bg-surface p-4 text-left">
           <div className="flex justify-between"><span className="font-medium">{isDeposit(r) ? r.contributor : "Penarikan"}</span><span className={`font-semibold ${isDeposit(r) ? "" : "text-danger"}`}>{isDeposit(r) ? "+" : "−"}{formatRupiah(r.amount)}</span></div>
           <p className="text-xs text-muted">{isDeposit(r) ? r.deposited_on : r.withdrawn_on}{r.note ? ` · ${r.note}` : ""}</p>
