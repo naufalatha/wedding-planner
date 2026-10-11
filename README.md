@@ -51,7 +51,8 @@ Supabase (Auth, PostgreSQL + RLS, RPC, Realtime) · Vitest · Playwright
 
 ## Mulai cepat
 
-Butuh Node.js 20+ dan satu proyek Supabase.
+Butuh **Node.js 22.12+** (Node 20 memunculkan peringatan `EBADENGINE` dan tes bisa gagal) dan satu proyek Supabase.
+Di folder `app/` sudah ada `.nvmrc`, jadi cukup `nvm install && nvm use`.
 
 **1. Siapkan database.** Di Supabase → SQL Editor, jalankan semua file di `supabase/migrations/`
 berurutan (0001 sampai 0005). Atau pakai `supabase db push`.
@@ -88,7 +89,7 @@ Buka http://localhost:3000.
 
 ## Pasang di ponsel
 
-Deploy ke Vercel (root directory `app`, isi dua variabel env di atas), lalu buka URL-nya di ponsel:
+Deploy ke Vercel (root directory `app`, Node 22, isi dua variabel env di atas), lalu buka URL-nya di ponsel:
 - **iPhone:** Safari → Bagikan → *Tambahkan ke Layar Utama*
 - **Android:** Chrome → *Instal aplikasi*
 
