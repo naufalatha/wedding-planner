@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { ItemSheet } from "@/components/finance/item-sheet";
-import { EMPTY_FILTER, ItemFilters, SECTION_LABEL as SECTION, filterItems, type ItemFilter } from "@/components/finance/item-filters";
+import { canonCategory, EMPTY_FILTER, ItemFilters, SECTION_LABEL as SECTION, filterItems, type ItemFilter } from "@/components/finance/item-filters";
 import { LedgerTab } from "@/components/finance/ledger-tab";
 import { Button, Card, Chip, Empty, ErrorNote, ProgressBar, SelectInput, Sheet, StatusChip, TextInput, MoneyInput, ListSkeleton } from "@/components/ui";
 import { formatRupiah, parseRupiah } from "@/domain/money";
@@ -14,6 +14,7 @@ import { useWedding } from "@/lib/wedding-context";
 export default function Keuangan() {
   const { weddingId } = useWedding();
   const d = useWeddingData(weddingId);
+  const cats = [...new Set((d.items.data ?? []).map((i) => i.category).filter((c): c is string => Boolean(c)))].sort((a, b) => a.localeCompare(b));
   const [tab, setTab] = useState<"item" | "setoran" | "penarikan">("item");
   const [sel, setSel] = useState<BudgetItemStatusRow | null>(null);
   const [adding, setAdding] = useState(false);
@@ -23,7 +24,7 @@ export default function Keuangan() {
   const [f, setF] = useState({ section: "vendor" as Section, category: "", name: "", est: "", fin: "", due: "", vendor: "" });
   const bad = [f.est, f.fin].some((v) => v !== "" && Number.isNaN(parseRupiah(v)));
   const add = useAction(async () => {
-    await insertRow("budget_items", { wedding_id: weddingId, section: f.section, category: f.category.trim() || null, name: f.name.trim(), estimated_price: parseRupiah(f.est), final_price: parseRupiah(f.fin), due_date: f.due || null, vendor_id: f.vendor || null });
+    await insertRow("budget_items", { wedding_id: weddingId, section: f.section, category: canonCategory(f.category, cats), name: f.name.trim(), estimated_price: parseRupiah(f.est), final_price: parseRupiah(f.fin), due_date: f.due || null, vendor_id: f.vendor || null });
     setF({ ...f, name: "", est: "", fin: "", due: "", vendor: "" });
     setAdding(false);
   });
@@ -116,7 +117,8 @@ export default function Keuangan() {
             {(Object.keys(SECTION) as Section[]).map((k) => <option key={k} value={k}>{SECTION[k]}</option>)}
           </SelectInput>
           <TextInput label="Nama" required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
-          <TextInput label="Kategori (opsional)" value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })} />
+          <TextInput label="Kategori (opsional)" list="kategori-item" autoComplete="off" value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })} hint="Pilih dari saran atau ketik baru." />
+          <datalist id="kategori-item">{cats.map((c) => <option key={c} value={c} />)}</datalist>
           <MoneyInput label="Estimasi (Rp)" inputMode="numeric" value={f.est} onChange={(e) => setF({ ...f, est: e.target.value })} hint="Boleh dikosongkan." />
           <MoneyInput label="Harga final (Rp)" inputMode="numeric" value={f.fin} onChange={(e) => setF({ ...f, fin: e.target.value })} hint="Boleh dikosongkan." />
           <TextInput label="Jatuh tempo (opsional)" type="date" value={f.due} onChange={(e) => setF({ ...f, due: e.target.value })} />

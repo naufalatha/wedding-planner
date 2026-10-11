@@ -56,3 +56,10 @@ export function ItemFilters({ items, value, onChange, shown, compact = false }: 
     </div>
   );
 }
+
+/** Samakan ejaan dengan kategori yang sudah ada (tanpa membedakan huruf besar/kecil) agar filter tidak terpecah. */
+export function canonCategory(input: string, existing: string[]): string | null {
+  const t = input.trim().replace(/\s+/g, " ");
+  if (!t) return null;
+  return existing.find((c) => c.toLowerCase() === t.toLowerCase()) ?? t;
+}
