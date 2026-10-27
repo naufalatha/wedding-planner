@@ -1,61 +1,119 @@
 @import "tailwindcss";
 
+/* Planikah: palet pewarna alam. Tarum (indigo) untuk aksi, kunyit hanya sorotan, daun = selesai, bata = terlambat. */
 :root {
-  --bg: #f8f6f1;
+  --paper: #f2f4f8;
   --surface: #ffffff;
-  --text: #1e2b25;
-  --text-secondary: #5f6b64;
-  --border: #e6e2d8;
-  --accent: #c8a25e;
-  --accent-soft: #f3ead5;
-  --sage-soft: #e2ebe3;
-  --blush-soft: #f6e5e1;
-  --error: #b42318;
+  --ink: #12183a;
+  --muted: #566080;
+  --line: #dde1ec;
+  --line-strong: #c2c9dd;
+  --indigo: #243089;
+  --indigo-deep: #18216b;
+  --indigo-soft: #e4e8f7;
+  --kunyit: #f0ab1f;
+  --kunyit-soft: #fbefc9;
+  --daun: #2e7d5b;
+  --daun-soft: #dcefe4;
+  --bata: #c23a2b;
+  --bata-soft: #f9e3df;
 }
 
 @theme inline {
-  --color-bg: var(--bg);
+  --color-paper: var(--paper);
   --color-surface: var(--surface);
-  --color-ink: var(--text);
-  --color-muted: var(--text-secondary);
-  --color-line: var(--border);
-  --color-accent: var(--accent);
-  --color-accent-soft: var(--accent-soft);
-  --color-sage-soft: var(--sage-soft);
-  --color-blush-soft: var(--blush-soft);
-  --color-danger: var(--error);
-  --radius-card: 20px;
-  --radius-input: 12px;
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-indigo: var(--indigo);
+  --color-indigo-deep: var(--indigo-deep);
+  --color-indigo-soft: var(--indigo-soft);
+  --color-kunyit: var(--kunyit);
+  --color-kunyit-soft: var(--kunyit-soft);
+  --color-daun: var(--daun);
+  --color-daun-soft: var(--daun-soft);
+  --color-danger: var(--bata);
+  --color-danger-soft: var(--bata-soft);
+
+  /* Radius menurut peran: kontrol kecil, baris/daftar, sheet. */
+  --radius-ctl: 12px;
+  --radius-group: 16px;
+  --radius-sheet: 22px;
+
+  --font-sans: var(--font-jakarta), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-young), Georgia, "Times New Roman", serif;
+
+  /* Skala tipe (px): 12 / 13 / 15 / 17 / 22 / 28 / 36 / 64 */
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.125rem;
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.4rem;
+  --text-lead: 1.0625rem;
+  --text-lead--line-height: 1.5rem;
+  --text-title: 1.375rem;
+  --text-title--line-height: 1.75rem;
+  --text-head: 1.75rem;
+  --text-head--line-height: 2.125rem;
+  --text-name: 2.25rem;
+  --text-name--line-height: 2.5rem;
 }
 
 html {
   color-scheme: light;
+  font-size: 100%;
 }
 
 body {
-  background: var(--bg);
-  color: var(--text);
+  background: var(--paper);
+  color: var(--ink);
   font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
   -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Angka rupiah, tanggal, dan hitungan sejajar kolom. */
+.num { font-variant-numeric: tabular-nums lining-nums; }
+.display { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.01em; }
+
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--indigo);
+  outline-offset: 2px;
+}
+.on-indigo :where(a, button):focus-visible { outline-color: var(--kunyit); }
+
+/* Tepi tumpal: segitiga berjajar khas kain, menutup blok indigo. Hanya dipakai di Beranda dan Masuk. */
+.tumpal {
+  height: 14px;
+  background: var(--indigo-deep);
+  -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 28px 100%;
+  mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 28px 100%;
 }
 
 /* ---- Loading & transisi (hormati prefers-reduced-motion) ---- */
 .skeleton {
-  background: linear-gradient(90deg, var(--border) 0%, #f2efe7 50%, var(--border) 100%);
+  background: linear-gradient(90deg, var(--line) 0%, #eceef5 50%, var(--line) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
 }
 .logo-spin { animation: logo-spin 1.6s cubic-bezier(0.65, 0, 0.35, 1) infinite; transform-origin: 50% 50%; }
-.page-in { animation: page-in 220ms ease-out backwards; }
-.sheet-in { animation: sheet-in 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.sheet-in { animation: sheet-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.scrim-in { animation: scrim-in 200ms ease-out both; }
+.bar-fill { transition: width 700ms cubic-bezier(0.2, 0.8, 0.2, 1); }
 
 @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 @keyframes logo-spin { 0% { transform: rotate(0) scale(1); } 50% { transform: rotate(180deg) scale(0.9); } 100% { transform: rotate(360deg) scale(1); } }
-@keyframes page-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes sheet-in { from { transform: translateY(32px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes scrim-in { from { opacity: 0; } to { opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .skeleton, .logo-spin, .page-in, .sheet-in { animation: none; }
-  .skeleton { background: var(--border); }
+  .skeleton, .logo-spin, .sheet-in, .scrim-in { animation: none; }
+  .skeleton { background: var(--line); }
+  .bar-fill { transition: none; }
 }
+
+/* Sembunyikan scrollbar pada baris chip yang bisa digeser. */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

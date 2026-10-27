@@ -1,4 +1,4 @@
-# Wedding Planner (Naufal & Bella)
+# Planikah (Naufal & Bella)
 
 Aplikasi/PWA perencana pernikahan sederhana, hasil konversi dari Google Sheets. Pengguna utama: Naufal Atha Yudha (berbahasa Indonesia; tulis UI dan balasan dalam bahasa Indonesia).
 
@@ -17,7 +17,8 @@ Aplikasi/PWA perencana pernikahan sederhana, hasil konversi dari Google Sheets. 
 - Data lewat satu lapisan `src/lib/api.ts` dan `src/lib/hooks.ts` (TanStack Query, staleTime 5 menit, realtime memicu invalidasi tertarget).
 - Mobile first: target sentuh >= 44px, tanpa scroll horizontal di 320px, hormati `prefers-reduced-motion`. Popup (`Sheet`) dirender lewat portal ke `document.body`.
 - Nominal: `MoneyInput` (pemisah ribuan titik), `parseRupiah`/`formatRupiah` di `src/domain/money.ts`.
-- Warna lewat token di `globals.css` (Champagne/Sage/Blush); jangan hardkod warna.
+- Design system "pewarna alam" di `globals.css`: tarum (indigo) untuk aksi, kunyit hanya sorotan, daun = selesai/hadir, bata = terlambat/galat. Jangan hardkod warna. Font: Young Serif (`.display`, nama, judul halaman, angka besar) dan Plus Jakarta Sans (UI). Angka rupiah/tanggal pakai `.num` (tabular). Kontrol 44px, input 16px, radius per peran (`ctl` 12, `group` 16, `sheet` 22). Tepi tumpal (`.tumpal`) hanya di Beranda dan Masuk. Jangan beri `className` yang menimpa properti yang sudah diatur varian komponen (tidak ada tailwind-merge); pakai prop (`compact`, `stack`).
+- Pola UI: judul halaman + tombol Tambah di `PageHeader`; cari + chip status + sheet Filter lewat `FilterBar`/`FilterSheet`; daftar lewat `Group` + `Row*`; judul kelompok menempel `SectionHead`; tombol Simpan di sheet lewat `StickyActions`.
 
 ## Git
 - Branch `main`, remote `github.com/naufalatha/wedding-planner`.

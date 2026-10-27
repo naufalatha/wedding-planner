@@ -3,7 +3,7 @@ import { formatRupiah, groupDigits, parseRupiah } from "./money";
 import { committedPrice, fundSummary, netPaid, paymentStatus, planRemaining, remainingBill } from "./finance";
 import { duplicateNames, guestSummary, validateAttendance } from "./guests";
 import { contributorTotals, nearestBills, nearestOpenTasks } from "./home";
-import { daysUntil, jakartaDate } from "./dates";
+import { dayMonth, daysUntil, dueLabel, jakartaDate } from "./dates";
 
 describe("rupiah", () => {
   it("memformat rupiah utuh, negatif, dan kosong", () => {
@@ -109,6 +109,11 @@ describe("tanggal Asia/Jakarta", () => {
     // 23:30 UTC tanggal 10 = 06:30 Jakarta tanggal 11
     expect(jakartaDate(new Date("2026-10-10T23:30:00Z"))).toBe("2026-10-11");
     expect(daysUntil("2026-10-12", new Date("2026-10-10T23:30:00Z"))).toBe(1);
+  });
+  it("kata untuk tenggat dan blok tanggal", () => {
+    expect(["2026-10-11", "2026-10-12", "2026-10-15", "2026-10-09"].map((d) => dueLabel(d, "2026-10-11")))
+      .toEqual(["Hari ini", "Besok", "4 hari lagi", "Terlambat 2 hari"]);
+    expect(dayMonth("2026-10-28")).toEqual({ day: "28", mon: "Okt" });
   });
 });
 

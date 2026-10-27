@@ -3,18 +3,18 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { SetupNotice } from "@/components/setup-notice";
-import { cx, ErrorNote, Loading } from "@/components/ui";
+import { cx, ErrorNote, Icon, Loading, Logo, type IconName } from "@/components/ui";
 import { useMembership, useSession, useWeddingData } from "@/lib/hooks";
 import { useRealtimeInvalidation } from "@/lib/query";
 import { isConfigured } from "@/lib/supabase";
 import { WeddingProvider } from "@/lib/wedding-context";
 
-const NAV = [
-  { href: "/beranda", label: "Beranda", d: "M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z" },
-  { href: "/keuangan", label: "Keuangan", d: "M3 7h18v12H3zM3 7l3-3h12l3 3M16 13h2" },
-  { href: "/persiapan", label: "Persiapan", d: "M5 4h14v16H5zM9 9l2 2 4-4M9 15h6" },
-  { href: "/vendor", label: "Vendor", d: "M4 9l2-5h12l2 5M4 9v11h16V9M4 9h16M10 20v-6h4v6" },
-  { href: "/tamu", label: "Tamu", d: "M16 11a4 4 0 10-8 0 4 4 0 008 0zM4 21c0-4 4-6 8-6s8 2 8 6" },
+const NAV: { href: string; label: string; icon: IconName }[] = [
+  { href: "/beranda", label: "Beranda", icon: "home" },
+  { href: "/keuangan", label: "Keuangan", icon: "wallet" },
+  { href: "/persiapan", label: "Persiapan", icon: "tasks" },
+  { href: "/vendor", label: "Vendor", icon: "store" },
+  { href: "/tamu", label: "Tamu", icon: "users" },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -39,18 +39,45 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <WeddingProvider value={{ weddingId: membership.data.wedding_id, role: membership.data.role, email: session.user.email ?? "", userId: session.user.id }}>
-      <div key={path} className="page-in mx-auto min-h-dvh max-w-2xl px-5 pb-28 pt-6">{children}</div>
-      <nav aria-label="Menu utama" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
+      {/* Layar lebar: rel samping. Ponsel: bilah bawah. */}
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-56 flex-col border-r border-line bg-surface px-3 py-6 md:flex">
+        <Link href="/beranda" className="mb-8 flex items-center gap-2.5 px-2"><Logo size={32} /><span className="display text-title">Planikah</span></Link>
+        <nav aria-label="Menu samping" className="flex-1">
+          <ul className="space-y-1">
+            {NAV.map((n) => {
+              const active = path.startsWith(n.href);
+              return (
+                <li key={n.href}>
+                  <Link href={n.href} aria-current={active ? "page" : undefined}
+                    className={cx("flex min-h-11 items-center gap-3 rounded-ctl px-3", active ? "bg-indigo-soft font-semibold text-indigo" : "text-muted hover:bg-paper")}>
+                    <Icon name={n.icon} />{n.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+        <Link href="/akun" aria-current={path.startsWith("/akun") ? "page" : undefined}
+          className={cx("flex min-h-11 items-center gap-3 rounded-ctl px-3", path.startsWith("/akun") ? "bg-indigo-soft font-semibold text-indigo" : "text-muted hover:bg-paper")}>
+          <Icon name="user" /><span className="min-w-0 truncate">Akun</span>
+        </Link>
+      </aside>
+
+      <div className="min-h-dvh md:pl-56">
+        <div className="mx-auto w-full max-w-2xl px-4 pb-28 pt-5 md:max-w-3xl md:px-6 md:pb-12 md:pt-8">{children}</div>
+      </div>
+
+      <nav aria-label="Menu utama" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
         <ul className="mx-auto grid max-w-2xl grid-cols-5">
           {NAV.map((n) => {
             const active = path.startsWith(n.href);
             return (
               <li key={n.href}>
-                <Link href={n.href} aria-current={active ? "page" : undefined} className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-0.5 py-1.5 text-[11px]">
-                  <span className={cx("grid h-7 w-[min(3rem,100%)] place-items-center rounded-full", active && "bg-accent")}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d={n.d} /></svg>
-                  </span>
-                  <span className={active ? "font-semibold" : "text-muted"}>{n.label}</span>
+                <Link href={n.href} aria-current={active ? "page" : undefined}
+                  className={cx("relative flex min-h-14 min-w-0 flex-col items-center justify-center gap-0.5 pt-1 text-[12px] leading-4", active ? "font-semibold text-indigo" : "text-muted")}>
+                  {active && <span aria-hidden className="absolute left-1/2 top-0 h-[3px] w-8 -translate-x-1/2 rounded-b-full bg-kunyit" />}
+                  <Icon name={n.icon} size={22} />
+                  <span>{n.label}</span>
                 </Link>
               </li>
             );

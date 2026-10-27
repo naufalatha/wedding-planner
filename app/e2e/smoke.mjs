@@ -87,7 +87,7 @@ await page.waitForURL("**/beranda");
 await page.getByText("Adi & Sari").waitFor();
 assert.ok(await page.getByText("42%").first().isVisible(), "progres 42% tampil");
 assert.ok(await page.getByText("Rp42.000.000").first().isVisible());
-const days = await page.locator("p.text-6xl").innerText();
+const days = await page.locator("[data-countdown]").innerText();
 assert.match(days, /^\d+$/);
 await shot("02-beranda");
 
