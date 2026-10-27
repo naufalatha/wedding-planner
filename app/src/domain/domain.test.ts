@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { formatRupiah, groupDigits, parseRupiah } from "./money";
-import { committedPrice, fundSummary, netPaid, paymentStatus, planRemaining, remainingBill } from "./finance";
+import { balanceAfterSettled, committedPrice, fundSummary, netPaid, paymentStatus, planRemaining, remainingBill } from "./finance";
 import { duplicateNames, guestSummary, validateAttendance } from "./guests";
 import { contributorTotals, nearestBills, nearestOpenTasks } from "./home";
 import { dayMonth, daysUntil, dueLabel, jakartaDate } from "./dates";
@@ -68,6 +68,10 @@ describe("keuangan (angka spreadsheet)", () => {
     expect(planRemaining(69_715_000, 31_250_000)).toBe(38_465_000);
     expect(planRemaining(69_715_000, 70_000_000)).toBe(-285_000);
     expect(planRemaining(null, 1)).toBeNull();
+  });
+  it("sisa dana setelah semua tagihan lunas", () => {
+    expect(balanceAfterSettled(65_683_000, 50_000_000)).toBe(15_683_000);
+    expect(balanceAfterSettled(10_000_000, 12_500_000)).toBe(-2_500_000);
   });
 });
 

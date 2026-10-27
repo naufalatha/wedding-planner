@@ -67,3 +67,8 @@ export function fundSummary(i: FundInputs) {
 export function planRemaining(budgetCap: Rupiah | null, totalCommitted: Rupiah): Rupiah | null {
   return budgetCap === null ? null : budgetCap - totalCommitted;
 }
+
+/** Sisa dana kalau semua tagihan dilunasi = saldo tersedia − sisa tagihan. Negatif = dana kurang. */
+export function balanceAfterSettled(available: Rupiah, outstanding: Rupiah): Rupiah {
+  return available - outstanding;
+}
