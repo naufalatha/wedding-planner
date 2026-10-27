@@ -97,7 +97,7 @@ export function SelectInput({ label, children, ...p }: React.SelectHTMLAttribute
   return <Field label={label}>{(id) => <select id={id} {...p} className={inputCls}>{children}</select>}</Field>;
 }
 
-/** Dua isian sejajar untuk pasangan pendek (jumlah + tanggal, estimasi + harga final). */
+/** Dua isian sejajar untuk pasangan pendek (jumlah + tanggal). */
 export const FieldRow = ({ children }: { children: ReactNode }) => <div className="grid grid-cols-2 gap-3">{children}</div>;
 
 export function Checkbox({ label, ...p }: React.InputHTMLAttributes<HTMLInputElement> & { label: string }) {

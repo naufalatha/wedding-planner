@@ -129,7 +129,7 @@ function VendorForm({ weddingId, v, categories, items, onClose }: { weddingId: s
   const remove = useAction(async () => { if (v) await archiveRow("vendors", v.id, v.revision); onClose(); });
   const addBudget = useAction(async () => {
     if (!v) return;
-    await insertRow("budget_items", { wedding_id: weddingId, section: "vendor", category: v.category, name: v.name, vendor_id: v.id, estimated_price: v.price_quote });
+    await insertRow("budget_items", { wedding_id: weddingId, section: "vendor", category: v.category, name: v.name, vendor_id: v.id, final_price: v.price_quote });
     onClose();
   });
   return (

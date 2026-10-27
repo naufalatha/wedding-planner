@@ -19,14 +19,14 @@ export function ItemSheet({ weddingId, item, payments, vendors, onClose }: { wed
 
 function Body({ weddingId, item, payments, vendors, onClose }: { weddingId: string; item: BudgetItemStatusRow; payments: Payment[]; vendors: Vendor[]; onClose: () => void }) {
   const row = useQuery({ queryKey: ["item", item.budget_item_id], queryFn: () => getItem(item.budget_item_id) });
-  const [prices, setPrices] = useState<{ est: string; fin: string; due: string; vendor: string } | null>(null);
-  const base = { est: item.estimated_price?.toString() ?? "", fin: item.final_price?.toString() ?? "", due: item.due_date ?? "", vendor: item.vendor_id ?? "" };
-  const { est, fin, due, vendor } = prices ?? base;
+  const [prices, setPrices] = useState<{ fin: string; due: string; vendor: string } | null>(null);
+  const base = { fin: item.final_price?.toString() ?? "", due: item.due_date ?? "", vendor: item.vendor_id ?? "" };
+  const { fin, due, vendor } = prices ?? base;
   const edit = (patch: Partial<typeof base>) => setPrices({ ...(prices ?? base), ...patch });
-  const badPrice = [est, fin].some((v) => v !== "" && Number.isNaN(parseRupiah(v)));
+  const badPrice = fin !== "" && Number.isNaN(parseRupiah(fin));
   const savePrices = useAction(async () => {
     if (!row.data) return;
-    await updateRow("budget_items", row.data.id, row.data.revision, { estimated_price: parseRupiah(est), final_price: parseRupiah(fin), due_date: due || null, vendor_id: vendor || null });
+    await updateRow("budget_items", row.data.id, row.data.revision, { estimated_price: null, final_price: parseRupiah(fin), due_date: due || null, vendor_id: vendor || null });
     setPrices(null);
     await row.refetch();
   });
@@ -57,7 +57,6 @@ function Body({ weddingId, item, payments, vendors, onClose }: { weddingId: stri
           <div><dt className="text-meta text-muted">Sisa</dt><dd className={cx("num font-semibold", (item.remaining ?? 0) < 0 && "text-danger")}>{formatRupiah(item.remaining)}</dd></div>
         </dl>
         {ratio !== null && <ProgressBar value={ratio} tone={item.status === "lunas" ? "daun" : "indigo"} className="mt-3" />}
-        {item.final_price === null && item.committed_price !== null && <p className="mt-2 text-meta text-muted">Harga ini masih berdasar estimasi.</p>}
       </Panel>
 
       <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); addPayment.mutate(undefined); }}>
@@ -121,11 +120,8 @@ function Body({ weddingId, item, payments, vendors, onClose }: { weddingId: stri
 
       <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); savePrices.mutate(undefined); }}>
         <h3 className="text-lead font-semibold">Detail</h3>
-        <FieldRow>
-          <MoneyInput label="Estimasi (Rp)" value={est} onChange={(e) => edit({ est: e.target.value })} />
-          <MoneyInput label="Harga final (Rp)" value={fin} onChange={(e) => edit({ fin: e.target.value })} />
-        </FieldRow>
-        <p className="-mt-2 text-meta text-muted">Estimasi kosong berarti belum dianggarkan. Harga final, jika diisi, dipakai sebagai harga tagihan.</p>
+        <MoneyInput label="Harga (Rp)" value={fin} onChange={(e) => edit({ fin: e.target.value })} />
+        <p className="-mt-2 text-meta text-muted">Harga kosong berarti belum dianggarkan.</p>
         <TextInput label="Jatuh tempo (opsional)" type="date" value={due} onChange={(e) => edit({ due: e.target.value })} />
         <SelectInput label="Vendor terkait (opsional)" value={vendor} onChange={(e) => edit({ vendor: e.target.value })}>
           <option value="">Tidak ada</option>

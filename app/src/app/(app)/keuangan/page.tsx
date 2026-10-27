@@ -27,11 +27,11 @@ export default function Keuangan() {
   const [flt, setFlt] = useState<ItemFilter>(EMPTY_FILTER);
   const [payFlt, setPayFlt] = useState<ItemFilter>(EMPTY_FILTER);
   const [quickPay, setQuickPay] = useState(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).has("bayar"));
-  const [f, setF] = useState({ section: "vendor" as Section, category: "", name: "", est: "", fin: "", due: "", vendor: "" });
-  const bad = [f.est, f.fin].some((v) => v !== "" && Number.isNaN(parseRupiah(v)));
+  const [f, setF] = useState({ section: "vendor" as Section, category: "", name: "", price: "", due: "", vendor: "" });
+  const bad = f.price !== "" && Number.isNaN(parseRupiah(f.price));
   const add = useAction(async () => {
-    await insertRow("budget_items", { wedding_id: weddingId, section: f.section, category: canonCategory(f.category, cats), name: f.name.trim(), estimated_price: parseRupiah(f.est), final_price: parseRupiah(f.fin), due_date: f.due || null, vendor_id: f.vendor || null });
-    setF({ ...f, name: "", est: "", fin: "", due: "", vendor: "" });
+    await insertRow("budget_items", { wedding_id: weddingId, section: f.section, category: canonCategory(f.category, cats), name: f.name.trim(), final_price: parseRupiah(f.price), due_date: f.due || null, vendor_id: f.vendor || null });
+    setF({ ...f, name: "", price: "", due: "", vendor: "" });
     setAdding(false);
   });
 
@@ -62,7 +62,6 @@ export default function Keuangan() {
           <div>
             <p className="text-meta text-muted">Sisa tagihan</p>
             <p className="display num text-[1.1875rem] leading-7">{formatRupiah(s.outstanding)}</p>
-            {s.estimate_based_count > 0 && <p className="mt-0.5 text-meta text-muted">{s.estimate_based_count} item berdasar estimasi</p>}
           </div>
           <div>
             <p className="text-meta text-muted">Sisa setelah lunas</p>
@@ -80,8 +79,7 @@ export default function Keuangan() {
             Rincian anggaran<Icon name="down" size={18} className="group-open:rotate-180" />
           </summary>
           <dl className="space-y-2 pb-1 pt-1">
-            <LedgerRow label="Total estimasi" value={formatRupiah(s.total_estimated)} />
-            <LedgerRow label="Total komitmen" value={formatRupiah(s.total_committed)} />
+            <LedgerRow label="Total biaya" value={formatRupiah(s.total_committed)} />
             <LedgerRow label="Pembayaran tercatat" value={formatRupiah(s.total_paid)} />
             <LedgerRow label="Sisa anggaran rencana" value={s.plan_remaining === null ? "Batas belum diatur" : formatRupiah(s.plan_remaining)} tone={(s.plan_remaining ?? 0) < 0 ? "danger" : undefined} />
           </dl>
@@ -159,10 +157,7 @@ export default function Keuangan() {
             <TextInput label="Kategori" list="kategori-item" autoComplete="off" value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })} />
           </FieldRow>
           <datalist id="kategori-item">{cats.map((c) => <option key={c} value={c} />)}</datalist>
-          <FieldRow>
-            <MoneyInput label="Estimasi (Rp)" value={f.est} onChange={(e) => setF({ ...f, est: e.target.value })} />
-            <MoneyInput label="Harga final (Rp)" value={f.fin} onChange={(e) => setF({ ...f, fin: e.target.value })} />
-          </FieldRow>
+          <MoneyInput label="Harga (Rp)" value={f.price} onChange={(e) => setF({ ...f, price: e.target.value })} />
           <p className="-mt-2 text-meta text-muted">Harga boleh dikosongkan. Kategori: pilih dari saran atau ketik baru.</p>
           <TextInput label="Jatuh tempo (opsional)" type="date" value={f.due} onChange={(e) => setF({ ...f, due: e.target.value })} />
           <SelectInput label="Vendor terkait (opsional)" value={f.vendor} onChange={(e) => setF({ ...f, vendor: e.target.value })}>
