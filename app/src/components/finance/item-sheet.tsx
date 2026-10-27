@@ -121,7 +121,7 @@ function Body({ weddingId, item, payments, vendors, onClose }: { weddingId: stri
       <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); savePrices.mutate(undefined); }}>
         <h3 className="text-lead font-semibold">Detail</h3>
         <MoneyInput label="Harga (Rp)" value={fin} onChange={(e) => edit({ fin: e.target.value })} />
-        <p className="-mt-2 text-meta text-muted">Harga kosong berarti belum dianggarkan.</p>
+        <p className="-mt-2 text-meta text-muted">Harga kosong berarti belum ada harga (belum dihitung di total).</p>
         <TextInput label="Jatuh tempo (opsional)" type="date" value={due} onChange={(e) => edit({ due: e.target.value })} />
         <SelectInput label="Vendor terkait (opsional)" value={vendor} onChange={(e) => edit({ vendor: e.target.value })}>
           <option value="">Tidak ada</option>

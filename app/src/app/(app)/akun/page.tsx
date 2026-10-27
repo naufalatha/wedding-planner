@@ -61,7 +61,7 @@ export default function Akun() {
           <MoneyInput label="Target dana (Rp)" value={f.target} onChange={on("target")} />
           <MoneyInput label="Saldo awal (Rp)" value={f.opening} onChange={on("opening")} />
         </FieldRow>
-        <MoneyInput label="Batas anggaran rencana (Rp)" value={f.cap} onChange={on("cap")} hint="Dipakai untuk menghitung sisa anggaran rencana di Keuangan." />
+        <MoneyInput label="Batas anggaran rencana (Rp)" value={f.cap} onChange={on("cap")} hint="Dipakai untuk menghitung sisa dari batas anggaran di Keuangan." />
         {bad && <p role="alert" className="text-meta text-danger">Nominal hanya boleh angka.</p>}
         <ErrorNote error={save.error} />
         <Button type="submit" className="w-full" disabled={save.isPending || bad || !form}>{save.isPending ? "Menyimpan…" : "Simpan perubahan"}</Button>

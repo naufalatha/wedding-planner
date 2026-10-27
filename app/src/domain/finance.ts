@@ -8,7 +8,7 @@ export interface PaymentRecord {
   cancelled?: boolean;
 }
 
-/** Harga komitmen = harga final bila ada, jika tidak estimasi. Keduanya kosong -> null. */
+/** Harga item = harga final bila ada, jika tidak estimasi lama (kolom legacy). Keduanya kosong -> null. */
 export function committedPrice(estimated: Rupiah | null, final: Rupiah | null): Rupiah | null {
   return final ?? estimated;
 }
@@ -28,7 +28,7 @@ export function paymentStatus(committed: Rupiah | null, paid: Rupiah): PaymentSt
   return "dp";
 }
 
-/** Sisa tagihan = komitmen − dibayar. Boleh negatif (kelebihan bayar). Kosong -> null. */
+/** Sisa tagihan = harga item − dibayar. Boleh negatif (kelebihan bayar). Kosong -> null. */
 export function remainingBill(committed: Rupiah | null, paid: Rupiah): Rupiah | null {
   return committed === null ? null : committed - paid;
 }
@@ -63,7 +63,7 @@ export function fundSummary(i: FundInputs) {
   };
 }
 
-/** Sisa anggaran rencana = batas anggaran − total komitmen. Negatif = melebihi rencana. */
+/** Sisa dari batas anggaran = batas anggaran − total biaya. Negatif = melebihi rencana. */
 export function planRemaining(budgetCap: Rupiah | null, totalCommitted: Rupiah): Rupiah | null {
   return budgetCap === null ? null : budgetCap - totalCommitted;
 }

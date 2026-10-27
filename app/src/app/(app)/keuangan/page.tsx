@@ -80,11 +80,11 @@ export default function Keuangan() {
           </summary>
           <dl className="space-y-2 pb-1 pt-1">
             <LedgerRow label="Total biaya" value={formatRupiah(s.total_committed)} />
-            <LedgerRow label="Pembayaran tercatat" value={formatRupiah(s.total_paid)} />
-            <LedgerRow label="Sisa anggaran rencana" value={s.plan_remaining === null ? "Batas belum diatur" : formatRupiah(s.plan_remaining)} tone={(s.plan_remaining ?? 0) < 0 ? "danger" : undefined} />
+            <LedgerRow label="Sudah dibayar" value={formatRupiah(s.total_paid)} />
+            <LedgerRow label="Sisa dari batas anggaran" value={s.plan_remaining === null ? "Batas belum diatur" : formatRupiah(s.plan_remaining)} tone={(s.plan_remaining ?? 0) < 0 ? "danger" : undefined} />
           </dl>
-          {s.unpriced_count > 0 && <p className="mt-3 rounded-ctl bg-kunyit-soft p-2.5 text-meta">{s.unpriced_count} item belum dianggarkan, belum dihitung di total.</p>}
-          {s.plan_remaining === null && <p className="mt-2 text-meta text-muted">Atur batas anggaran di Akun untuk melihat sisa anggaran rencana.</p>}
+          {s.unpriced_count > 0 && <p className="mt-3 rounded-ctl bg-kunyit-soft p-2.5 text-meta">{s.unpriced_count} item belum ada harga, belum dihitung di total.</p>}
+          {s.plan_remaining === null && <p className="mt-2 text-meta text-muted">Atur batas anggaran di Akun untuk melihat sisa dari batas anggaran.</p>}
         </details>
       </Panel>
       {s.available_balance < 0 && <p role="alert" className="rounded-ctl bg-danger-soft p-3 text-meta text-danger">Saldo dana negatif: pengeluaran sudah melebihi dana yang terkumpul.</p>}
@@ -107,7 +107,7 @@ export default function Keuangan() {
                       <span className="flex items-baseline justify-between gap-3">
                         <span className="min-w-0 truncate font-medium">{i.name}</span>
                         {i.remaining === null
-                          ? <span className="shrink-0 text-meta text-muted">Belum dianggarkan</span>
+                          ? <span className="shrink-0 text-meta text-muted">Belum ada harga</span>
                           : <span className={cx("num shrink-0 font-semibold", i.remaining < 0 && "text-danger")}><span className="font-normal text-muted">Sisa </span>{formatRupiah(i.remaining)}</span>}
                       </span>
                       <span className="flex items-center justify-between gap-3">

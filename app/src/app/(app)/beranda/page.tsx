@@ -111,9 +111,9 @@ export default function Beranda() {
             <LedgerRow label="Saldo tersedia" value={formatRupiah(s.available_balance)} tone={s.available_balance < 0 ? "danger" : undefined} />
             <LedgerRow label="Sisa tagihan" value={formatRupiah(s.outstanding)} />
             <LedgerRow label="Sisa setelah lunas" value={formatRupiah(balanceAfterSettled(s.available_balance, s.outstanding))} tone={balanceAfterSettled(s.available_balance, s.outstanding) < 0 ? "danger" : undefined} />
-            <LedgerRow label="Pembayaran tercatat" value={formatRupiah(s.total_paid)} />
+            <LedgerRow label="Sudah dibayar" value={formatRupiah(s.total_paid)} />
           </dl>
-          {s.unpriced_count > 0 && <div className="mt-3"><Flag href="/keuangan">{s.unpriced_count} item belum dianggarkan</Flag></div>}
+          {s.unpriced_count > 0 && <div className="mt-3"><Flag href="/keuangan">{s.unpriced_count} item belum ada harga</Flag></div>}
         </Panel>
       </section>
 
